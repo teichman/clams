@@ -69,6 +69,10 @@ int main(int argc, char** argv)
   string output_path = "distortion_model";
   model.save(output_path);
   cout << "Saved distortion model to " << output_path << endl;
+
+  string vis_dir = output_path + "-visualization";
+  model.visualize(vis_dir);
+  cout << "Saved visualization of distortion model to " << vis_dir << endl;
     
   return 0;
 }

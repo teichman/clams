@@ -7,9 +7,6 @@
 #include <bag_of_tricks/lockable.h>
 #include <stream_sequence/frame_projector.h>
 
-#define MAX_MULT 1.2
-#define MIN_MULT 0.8
-
 namespace clams
 {
 
