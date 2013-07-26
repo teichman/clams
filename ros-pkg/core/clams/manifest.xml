@@ -9,8 +9,15 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/clams</url>
 
-  <depend package="pcl_1_7"/>
+  <depend package="stream_sequence"/>
+  <depend package="bag_of_tricks"/>
 
+  <export>
+    <cpp cflags="-I${prefix}/include -fopenmp"
+         lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -fopenmp"/>
+  </export>
+  
+  
 </package>
 
 

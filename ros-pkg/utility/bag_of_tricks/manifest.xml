@@ -1,0 +1,21 @@
+<package>
+  <description brief="bag_of_tricks">
+
+     bag_of_tricks
+
+  </description>
+  <author>Alex Teichman</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/bag_of_tricks</url>
+
+  <depend package="serializable"/>
+  
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib `rosboost-cfg --lflags thread` -lbag_of_tricks" />
+  </export>
+
+  
+</package>
+
+

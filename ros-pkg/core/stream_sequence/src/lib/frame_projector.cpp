@@ -260,6 +260,7 @@ namespace clams
     ROS_ASSERT(cx_ != -1);
     ROS_ASSERT(cy_ != -1);
 
+    out << "FrameProjector v01" << endl;
     eigen_extensions::serializeScalar(width_, out);
     eigen_extensions::serializeScalar(height_, out);
     eigen_extensions::serializeScalar(fx_, out);
@@ -270,6 +271,9 @@ namespace clams
 
   void FrameProjector::deserialize(std::istream& in)
   {
+    string buf;
+    getline(in, buf);
+    ROS_ASSERT(buf == "FrameProjector v01");
     eigen_extensions::deserializeScalar(in, &width_);
     eigen_extensions::deserializeScalar(in, &height_);
     eigen_extensions::deserializeScalar(in, &fx_);
