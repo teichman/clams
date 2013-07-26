@@ -17,7 +17,8 @@ namespace clams
     typedef boost::shared_ptr<const StreamSequenceBase> ConstPtr;
   
     std::vector<double> timestamps_;
-
+    FrameProjector proj_;
+    
     StreamSequenceBase ():
       cache_size_(0)
     {}
@@ -47,15 +48,6 @@ namespace clams
     inline void
     setCacheSize (size_t cache_size) const
     { cache_size_ = cache_size; };
-
-    inline void
-    setUndistort (bool undistort)
-    { 
-      undistort_ = undistort;
-      // Clear the cache
-      pcds_cache_.clear ();
-      frames_cache_.clear ();
-    };
     
     //! Adds dt to all timestamps.  Does not save.
     void applyTimeOffset(double dt);

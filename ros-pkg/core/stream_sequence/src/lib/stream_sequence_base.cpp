@@ -1,16 +1,12 @@
 #include <stream_sequence/stream_sequence_base.h>
-#include <stream_sequence/stream_sequence.h>
 #include <stream_sequence/stream_sequence_pcl_wrapper.h>
 #include <limits>
 
 clams::StreamSequenceBase::Ptr clams::StreamSequenceBase::initializeFromDirectory (const std::string &dir)
 {
-  // Check if it's the old or new format
-  StreamSequenceBase::Ptr out;
-  if (boost::filesystem::exists (dir + "/primesense_model")) 
-    out.reset (new StreamSequence);
-  else
-    out.reset (new StreamSequencePCLWrapper);
+  // Used to check if it's the old or new format
+  // Now it's only PCL.
+  StreamSequenceBase::Ptr out(new StreamSequencePCLWrapper);
   out->load (dir);
   return out;
 }
@@ -51,7 +47,7 @@ clams::Cloud::Ptr clams::StreamSequenceBase::getCloud(size_t idx) const
   Cloud::Ptr pcd(new Cloud);
   Frame frame;
   readFrame(idx, &frame);
-  model_.frameToCloud(frame, pcd.get());
+  proj_.frameToCloud(frame, pcd.get());
   return pcd;
 }
 
@@ -60,7 +56,7 @@ clams::Cloud::Ptr clams::StreamSequenceBase::getCloud(double timestamp, double* 
   Cloud::Ptr pcd(new Cloud);
   Frame frame;
   readFrame(timestamp, dt, &frame);
-  model_.frameToCloud(frame, pcd.get());
+  proj_.frameToCloud(frame, pcd.get());
   return pcd;
 }
 
@@ -106,8 +102,8 @@ clams::Cloud::ConstPtr clams::StreamSequenceBase::at (size_t idx) const
 }
 
 void clams::StreamSequenceBase::addCloudToCache (
-    size_t idx, 
-    clams::Cloud::ConstPtr cloud) const
+  size_t idx, 
+  clams::Cloud::ConstPtr cloud) const
 {
   if (frames_cache_.size () >= cache_size_)
   {
@@ -131,13 +127,4 @@ size_t clams::StreamSequenceBase::readFrame(double timestamp, double* dt, Frame*
 void clams::StreamSequenceBase::readFrame(size_t idx, Frame* frame) const
 {
   readFrameImpl (idx, frame);
-  if (undistort_)  
-  {
-    if (!dddm_)
-      PCL_WARN ("Attempted to undistort a frame, but no distortion model was found!\n");
-    else
-    {
-      dddm_->undistort (frame); 
-    }
-  }
 }
