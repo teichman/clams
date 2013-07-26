@@ -12,6 +12,7 @@
   <depend package="pcl_1_7"/>
   <depend package="serializable"/>
   <depend package="eigen_extensions"/>
+  <depend package="rosconsole"/>
 
   <export>
     <cpp cflags="-I${prefix}/include"

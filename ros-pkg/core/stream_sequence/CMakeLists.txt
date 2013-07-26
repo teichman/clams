@@ -17,7 +17,8 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 rosbuild_add_library(stream_sequence
-  src/lib/stream_sequence_base.cpp
+#  src/lib/stream_sequence_base.cpp
+  src/lib/frame_projector.cpp
   )
 
 rosbuild_link_boost(stream_sequence system program_options)

@@ -1,24 +1,13 @@
 #ifndef STREAM_SEQUENCE_BASE_H
 #define STREAM_SEQUENCE_BASE_H
 
-#define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem.hpp>
 #include <boost/shared_ptr.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 #include <pcl/io/pcd_io.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <serializable/serializable.h>
-#include <eigen_extensions/eigen_extensions.h>
 #include <timer/timer.h>
-#include <rgbd_sequence/primesense_model.h>
-#include <rgbd_sequence/discrete_depth_distortion_model.h>
-#include <ros/assert.h>
-#include <ros/console.h>
+#include <stream_sequence/frame_projector.h>
 
-namespace rgbd
+namespace clams
 {
 
   class StreamSequenceBase
@@ -28,7 +17,6 @@ namespace rgbd
     typedef boost::shared_ptr<const StreamSequenceBase> ConstPtr;
   
     std::vector<double> timestamps_;
-    PrimeSenseModel model_;
 
     StreamSequenceBase ():
       cache_size_(0)
@@ -38,14 +26,11 @@ namespace rgbd
 
     static StreamSequenceBase::Ptr initializeFromDirectory (const std::string &dir);
 
-    //! Loads existing model and timestamps at root_path_, prepares for streaming from here.
     void load(const std::string &root_path);
 
     inline std::string getRootPath() const
     { return root_path_; };
 
-    //! Saves PrimeSenseModel and timestamps to root_path_.
-    //! Must have an initialized model_.
     virtual size_t size() const = 0;
 
     void readFrame(size_t idx, Frame* frame) const;
@@ -55,9 +40,9 @@ namespace rgbd
     //! dt is signed.
     size_t seek(double timestamp, double* dt) const;
 
-    rgbd::Cloud::ConstPtr operator[] (size_t idx) const;
+    clams::Cloud::ConstPtr operator[] (size_t idx) const;
 
-    rgbd::Cloud::ConstPtr at (size_t idx) const;
+    clams::Cloud::ConstPtr at (size_t idx) const;
 
     inline void
     setCacheSize (size_t cache_size) const
@@ -76,8 +61,8 @@ namespace rgbd
     void applyTimeOffset(double dt);
     //! Inefficient accessors that conceal ) how the projection is done.
     //! These shouldn't be used.
-    rgbd::Cloud::Ptr getCloud(size_t idx) const __attribute__ ((__deprecated__));
-    rgbd::Cloud::Ptr getCloud(double timestamp, double* dt) const __attribute__ ((__deprecated__));
+    clams::Cloud::Ptr getCloud(size_t idx) const __attribute__ ((__deprecated__));
+    clams::Cloud::Ptr getCloud(double timestamp, double* dt) const __attribute__ ((__deprecated__));
     cv::Mat3b getImage(size_t idx) const __attribute__ ((__deprecated__));
     cv::Mat3b getImage(double timestamp, double* dt) const __attribute__ ((__deprecated__));
     
@@ -88,14 +73,13 @@ namespace rgbd
     virtual void loadImpl(const std::string& root_path) = 0;
 
     void
-    addCloudToCache (size_t idx, rgbd::Cloud::ConstPtr cloud) const;
+    addCloudToCache (size_t idx, clams::Cloud::ConstPtr cloud) const;
 
     mutable std::deque<size_t> frames_cache_;
-    mutable std::map<size_t, rgbd::Cloud::ConstPtr> pcds_cache_;
+    mutable std::map<size_t, clams::Cloud::ConstPtr> pcds_cache_;
     mutable size_t cache_size_;
     std::string root_path_;
     bool undistort_;
-    DiscreteDepthDistortionModel::Ptr dddm_;
   };
 
   //! Accessor which has "push back" functionality, remapping indices appropriately...don't ask
@@ -115,12 +99,12 @@ namespace rgbd
       frames_.push_back (idx);
     }
 
-    inline rgbd::Cloud::ConstPtr operator[] (size_t idx) const
+    inline clams::Cloud::ConstPtr operator[] (size_t idx) const
     {
       return ( (*sseq_)[frames_[idx]]);
     }
 
-    inline rgbd::Cloud::ConstPtr at (size_t idx) const
+    inline clams::Cloud::ConstPtr at (size_t idx) const
     {
       ROS_ASSERT (idx < frames_.size ());
       return (operator[] (idx));
