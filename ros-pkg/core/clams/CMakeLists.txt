@@ -29,6 +29,8 @@ endif()
 #common commands for building c++ executables and libraries
 rosbuild_add_library(clams
   src/lib/discrete_depth_distortion_model.cpp
+  src/lib/slam_calibrator.cpp
+  src/lib/trajectory.cpp
   )
 
 rosbuild_add_compile_flags(clams -fopenmp)
@@ -38,3 +40,6 @@ rosbuild_link_boost(clams program_options)
 
 rosbuild_add_executable(inspect src/prog/inspect.cpp)
 target_link_libraries(inspect clams)
+
+rosbuild_add_executable(calibrate src/prog/calibrate.cpp)
+target_link_libraries(calibrate clams)

@@ -7,6 +7,9 @@
 #include <bag_of_tricks/lockable.h>
 #include <stream_sequence/frame_projector.h>
 
+#define MAX_MULT 1.2
+#define MIN_MULT 0.8
+
 namespace clams
 {
 
@@ -57,6 +60,7 @@ namespace clams
     DiscreteDepthDistortionModel& operator=(const DiscreteDepthDistortionModel& other);
     void undistort(Frame* frame) const;
     //! Returns the number of training examples it used from this pair.
+    //! Thread-safe.
     size_t accumulate(const Frame& ground_truth, const Frame& measurement);
     void addExample(const ProjectivePoint& ppt, double ground_truth, double measurement);
     void serialize(std::ostream& out) const;
