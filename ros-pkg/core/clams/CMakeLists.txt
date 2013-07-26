@@ -21,6 +21,11 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
+find_package(VTK REQUIRED)
+if(VTK_FOUND)
+  include(${VTK_USE_FILE})
+endif()
+
 #common commands for building c++ executables and libraries
 rosbuild_add_library(clams
   src/lib/discrete_depth_distortion_model.cpp
@@ -28,9 +33,8 @@ rosbuild_add_library(clams
 
 rosbuild_add_compile_flags(clams -fopenmp)
 rosbuild_add_link_flags(clams -fopenmp)
+rosbuild_add_boost_directories()
+rosbuild_link_boost(clams program_options)
 
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
+rosbuild_add_executable(inspect src/prog/inspect.cpp)
+target_link_libraries(inspect clams)

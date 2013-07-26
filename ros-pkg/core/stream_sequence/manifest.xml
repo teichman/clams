@@ -10,6 +10,7 @@
   <url>http://ros.org/wiki/stream_sequence</url>
 
   <depend package="pcl_1_7"/>
+  <depend package="opencv2"/>
   <depend package="serializable"/>
   <depend package="eigen_extensions"/>
   <depend package="rosconsole"/>
