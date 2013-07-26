@@ -1,0 +1,14 @@
+<package>
+  <description brief="pcl_1_7">
+
+     pcl_1_7
+
+  </description>
+  <author>teichman</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/pcl_1_7</url>
+
+</package>
+
+

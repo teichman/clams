@@ -1,0 +1,18 @@
+<package>
+  <description brief="eigen_flags">
+
+     eigen_flags
+
+  </description>
+  <author>teichman</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/eigen_flags</url>
+
+  <export>
+    <cpp cflags="-I/usr/include/eigen3"/>
+  </export>
+  
+</package>
+
+

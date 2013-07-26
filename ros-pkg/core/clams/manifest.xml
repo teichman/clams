@@ -1,0 +1,16 @@
+<package>
+  <description brief="clams">
+
+     clams
+
+  </description>
+  <author>teichman</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/clams</url>
+
+  <depend package="pcl_1_7"/>
+
+</package>
+
+
