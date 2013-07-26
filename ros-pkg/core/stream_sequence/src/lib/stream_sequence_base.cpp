@@ -1,12 +1,17 @@
 #include <stream_sequence/stream_sequence_base.h>
 #include <stream_sequence/stream_sequence_pcl_wrapper.h>
+#include <stream_sequence/stream_sequence.h>
 #include <limits>
 
 clams::StreamSequenceBase::Ptr clams::StreamSequenceBase::initializeFromDirectory (const std::string &dir)
 {
-  // Used to check if it's the old or new format
-  // Now it's only PCL.
-  StreamSequenceBase::Ptr out(new StreamSequencePCLWrapper);
+  // Check if it's the old or new format
+  StreamSequenceBase::Ptr out;
+  if (boost::filesystem::exists (dir + "/primesense_model")) {
+    out.reset (new clams::StreamSequence);
+  }
+  else
+    out.reset (new clams::StreamSequencePCLWrapper);
   out->load (dir);
   return out;
 }

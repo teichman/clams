@@ -124,7 +124,8 @@ namespace clams
 
   DiscreteDepthDistortionModel SlamCalibrator::calibrate() const
   {
-    DiscreteDepthDistortionModel model;
+    ROS_ASSERT(!sseqs_.empty());
+    DiscreteDepthDistortionModel model(sseqs_[0]->proj_);
 
     size_t total_num_training = 0;
     for(size_t i = 0; i < size(); ++i) {
@@ -164,6 +165,7 @@ namespace clams
 #pragma omp parallel for
     for(size_t i = 0; i < indices.size(); ++i) {
       size_t idx = indices[i];
+      ROS_ASSERT(traj.exists(idx));
       cout << "." << flush;
 
       Frame measurement;
@@ -171,7 +173,7 @@ namespace clams
     
       Frame mapframe;
       mapframe.depth_ = DepthMatPtr(new DepthMat);
-      sseq.proj_.estimateMapDepth(map, traj.get(i).inverse().cast<float>(),
+      sseq.proj_.estimateMapDepth(map, traj.get(idx).inverse().cast<float>(),
                                   measurement, mapframe.depth_.get());
       counts[i] = model->accumulate(mapframe, measurement);
     }
