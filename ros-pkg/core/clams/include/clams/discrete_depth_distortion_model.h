@@ -10,15 +10,6 @@
 namespace clams
 {
 
-  class DepthDistortionModel : public Serializable
-  {
-  public:
-    DepthDistortionModel() {}
-    virtual ~DepthDistortionModel() {}
-
-    virtual void undistort(Frame* frame) const = 0;
-  };
-
   class DiscreteFrustum : public Serializable, public SharedLockable
   {
   public:
@@ -27,7 +18,6 @@ namespace clams
     void addExample(double ground_truth, double measurement);
     int index(double z) const;
     void undistort(double* z) const;
-//  void undistort(int idx, float* z, float* mult) const;
     void interpolatedUndistort(double* z) const;
     void serialize(std::ostream& out) const;
     void deserialize(std::istream& in);
@@ -37,7 +27,6 @@ namespace clams
     int num_bins_;
     double bin_depth_;
     Eigen::VectorXf counts_;
-    // Eigen::VectorXf total_multipliers_;
     Eigen::VectorXf total_numerators_;
     Eigen::VectorXf total_denominators_;
     Eigen::VectorXf multipliers_;
@@ -45,7 +34,7 @@ namespace clams
     friend class DiscreteDepthDistortionModel;
   };
 
-  class DiscreteDepthDistortionModel : public DepthDistortionModel
+  class DiscreteDepthDistortionModel : public Serializable
   {
   public:
     typedef boost::shared_ptr<DiscreteDepthDistortionModel> Ptr;
