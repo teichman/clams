@@ -31,6 +31,9 @@ protected:
                    const openni_wrapper::DepthImage& depth);
   void keyboardCallback(const pcl::visualization::KeyboardEvent& event, void* cookie);
   void pointPickingCallback(const pcl::visualization::PointPickingEvent& event, void* cookie);
+  void toggleModel();
+  void enableModel();
+  void disableModel();
 };
 
 Inspector::Inspector() :
@@ -47,18 +50,53 @@ Inspector::Inspector() :
   pcd_vis_.addPointCloud(cloud, "cloud");
   pcd_vis_.registerKeyboardCallback(&Inspector::keyboardCallback, *this);
   pcd_vis_.registerPointPickingCallback(&Inspector::pointPickingCallback, *this);
+  int x = 10;
+  int y = 10;
+  int fontsize = 16;
+  pcd_vis_.addText("raw", x, y, fontsize, 1, 0, 0, "text");
+  pcd_vis_.setShowFPS(false);
+}
+
+void Inspector::toggleModel()
+{
+  if(use_intrinsics_)
+    disableModel();
+  else
+    enableModel();
+}
+
+void Inspector::disableModel()
+{
+  use_intrinsics_ = false;
+  
+  pcd_vis_.removeShape("text");
+  int x = 10;
+  int y = 10;
+  int fontsize = 16;
+  pcd_vis_.addText("raw", x, y, fontsize, 1, 0, 0, "text");
+}
+
+void Inspector::enableModel()
+{
+  use_intrinsics_ = true;
+  if(use_intrinsics_ && !dddm_) {
+    cout << "Cannot apply non-existent distortion model.  Supply one at the command line." << endl;
+    use_intrinsics_ = false;
+    return;
+  }
+  
+  pcd_vis_.removeShape("text");
+  int x = 10;
+  int y = 10;
+  int fontsize = 16;
+  pcd_vis_.addText("undistorted", x, y, fontsize, 0, 1, 0, "text");
 }
 
 void Inspector::keyboardCallback(const pcl::visualization::KeyboardEvent& event, void* cookie)
 {
   if(event.keyDown()) {
     if(event.getKeyCode() == 'm') {
-      use_intrinsics_ = !use_intrinsics_;
-      if(use_intrinsics_ && !dddm_) {
-        cout << "Cannot apply non-existent distortion model.  Supply one at the command line." << endl;
-        use_intrinsics_ = false;
-      }
-      cout << "use_intrinsics_: " << use_intrinsics_ << endl;
+      toggleModel();
     }
     else if(event.getKeyCode() == 'c') {
       pcd_vis_.removeAllShapes();
