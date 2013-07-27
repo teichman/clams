@@ -43,3 +43,6 @@ target_link_libraries(inspect clams)
 
 rosbuild_add_executable(calibrate src/prog/calibrate.cpp)
 target_link_libraries(calibrate clams)
+
+rosbuild_add_executable(visualize_model src/prog/visualize_model.cpp)
+target_link_libraries(visualize_model clams)

@@ -212,7 +212,7 @@ int main(int argc, char** argv)
 
   opts_desc.add_options()
     ("help,h", "produce help message")
-    ("intrinsics", bpo::value<string>(), "Optional discrete distortion model.")
+    ("intrinsics", bpo::value<string>(), "Optional distortion model.")
     ;
 
   p.add("intrinsics", 1);

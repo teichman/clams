@@ -250,11 +250,13 @@ namespace clams
     // -- Set up for combined imagery.
     int horiz_divider = 10;
     int vert_divider = 20;
-    cv::Mat3b mega(cv::Size(proj_.width_ * 2 + horiz_divider, proj_.height_ * num_layers + vert_divider * (num_layers + 2)), cv::Vec3b(0, 0, 0));
+    cv::Mat3b overview(cv::Size(proj_.width_ * 2 + horiz_divider, proj_.height_ * num_layers + vert_divider * (num_layers + 2)), cv::Vec3b(0, 0, 0));
     vector<int> pub_layers;
-    pub_layers.push_back(1);
-    pub_layers.push_back(2);
-    pub_layers.push_back(3);
+    for(int i = 0; i < num_layers; ++i)
+      pub_layers.push_back(i);
+    // pub_layers.push_back(1);
+    // pub_layers.push_back(2);
+    // pub_layers.push_back(3);
     cv::Mat3b pub(cv::Size(proj_.width_, proj_.height_ * pub_layers.size() + vert_divider * (pub_layers.size() + 2)), cv::Vec3b(255, 255, 255));
   
     for(int i = 0; i < num_layers; ++i) {
@@ -311,10 +313,10 @@ namespace clams
       oss << dir << "/combined_" << buffer << ".png";
       cv::imwrite(oss.str(), combined);
 
-      // -- Append to the mega image.
+      // -- Append to the overview image.
       for(int y = 0; y < combined.rows; ++y)
         for(int x = 0; x < combined.cols; ++x)
-          mega(y + i * (combined.rows + vert_divider) + vert_divider, x) = combined(y, x);
+          overview(y + i * (combined.rows + vert_divider) + vert_divider, x) = combined(y, x);
 
       // -- Compute the publication multipliers visualization for this layer.
       //    Multiplier of 1 is white, >1 is red, <1 is blue.  Think redshift.
@@ -343,28 +345,28 @@ namespace clams
     }
   
     // -- Add a white bar at the top and bottom for reference.
-    for(int y = 0; y < mega.rows; ++y)
-      if(y < vert_divider || y > mega.rows - vert_divider)
-        for(int x = 0; x < mega.cols; ++x)
-          mega(y, x) = cv::Vec3b(255, 255, 255);
+    for(int y = 0; y < overview.rows; ++y)
+      if(y < vert_divider || y > overview.rows - vert_divider)
+        for(int x = 0; x < overview.cols; ++x)
+          overview(y, x) = cv::Vec3b(255, 255, 255);
   
-    // -- Save mega image.
+    // -- Save overview image.
     ostringstream oss;
-    oss << dir << "/mega.png";
-    cv::imwrite(oss.str(), mega);
+    oss << dir << "/overview.png";
+    cv::imwrite(oss.str(), overview);
 
     // -- Save a small version for easy loading.
-    cv::Mat3b mega_scaled;
-    cv::resize(mega, mega_scaled, cv::Size(), 0.2, 0.2, cv::INTER_CUBIC);
+    cv::Mat3b overview_scaled;
+    cv::resize(overview, overview_scaled, cv::Size(), 0.2, 0.2, cv::INTER_CUBIC);
     oss.str("");
-    oss << dir << "/mega_scaled.png";
-    cv::imwrite(oss.str(), mega_scaled);
+    oss << dir << "/overview_scaled.png";
+    cv::imwrite(oss.str(), overview_scaled);
 
     // -- Save publication image.
     oss.str("");
     oss << dir << "/pub";
-    for(size_t i = 0; i < pub_layers.size(); ++i)
-      oss << "-" << setw(2) << setfill('0') << pub_layers[i];
+    // for(size_t i = 0; i < pub_layers.size(); ++i)
+    //   oss << "-" << setw(2) << setfill('0') << pub_layers[i];
     oss << ".png";
     cv::imwrite(oss.str(), pub);
   }
