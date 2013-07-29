@@ -5,9 +5,13 @@ release/built: git
 	cd release && make -j`cat /proc/cpuinfo  | grep processor | wc -l`  # Use as many cores as you have.
 	touch $@
 
+# HTTPS clone is not working on some machines.  Unclear why.  Using ssh (which requires  as a fallback.
 git:
-	#git clone https://github.com/PointCloudLibrary/pcl.git git  # This doesn't work for me.  Why?
-	git clone git@github.com:PointCloudLibrary/pcl.git git
+	@git clone https://github.com/PointCloudLibrary/pcl.git git; \
+	if [ $$? -ne 0 ]; then \
+	echo Using ssh fallback.; \
+	git clone git@github.com:PointCloudLibrary/pcl.git git; \
+	fi
 	cd git && git checkout pcl-1.7.0
 
 clean:
