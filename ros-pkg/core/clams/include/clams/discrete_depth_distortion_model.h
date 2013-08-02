@@ -87,6 +87,7 @@ namespace clams
     //! Saves images to the directory found at path.
     //! If path doesn't exist, it will be created.
     void visualize(const std::string& path) const;
+    std::string status(const std::string& prefix) const;
   
   protected:
     //! Image width.

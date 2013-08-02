@@ -285,4 +285,15 @@ namespace clams
     return (*frustums_[yidx][xidx]);
   }
 
+  std::string DiscreteDepthDistortionModel::status(const std::string& prefix) const
+  {
+    ostringstream oss;
+    oss << prefix << "Image width (pixels): " << width_ << endl;
+    oss << prefix << "Image height (pixels): " << height_ << endl;
+    oss << prefix << "Bin width (pixels): " << bin_width_ << endl;
+    oss << prefix << "Bin height (pixels): " << bin_height_ << endl;
+    oss << prefix << "Bin depth (m): " << bin_depth_ << endl;
+    return oss.str();
+  }
+
 }  // namespace clams
