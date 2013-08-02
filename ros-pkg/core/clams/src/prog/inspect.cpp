@@ -2,6 +2,8 @@
 #include <pcl/io/openni_grabber.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <clams/discrete_depth_distortion_model.h>
+#include <bag_of_tricks/lockable.h>
+#include <stream_sequence/frame_projector.h>
 
 using namespace std;
 using namespace Eigen;
@@ -176,7 +178,7 @@ void Inspector::updateDepth(const openni_wrapper::Image& image,
   }
 
   if(dddm_ && use_intrinsics_)
-    dddm_->undistort(&frame_);
+    dddm_->undistort(frame_.depth_.get());
 
   frame_.img_ = oniToCV(image);
     

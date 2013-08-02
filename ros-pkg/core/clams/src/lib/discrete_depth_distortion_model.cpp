@@ -4,6 +4,12 @@ using namespace std;
 using namespace Eigen;
 namespace bfs = boost::filesystem;
 
+// These are needed in frame_projector.h, but we don't want to depend on that code
+// so that people can easily use the DiscreteDepthDistortionModel without
+// worrying about dependencies.
+#define MAX_MULT 1.2
+#define MIN_MULT 0.8
+
 namespace clams
 {
 
@@ -20,14 +26,14 @@ namespace clams
 
   void DiscreteFrustum::addExample(double ground_truth, double measurement)
   {
-    scopeLockWrite;
-  
+    boost::unique_lock<boost::shared_mutex> ul(shared_mutex_);
+    
     double mult = ground_truth / measurement;
     if(mult > MAX_MULT || mult < MIN_MULT)
       return;
   
     int idx = min(num_bins_ - 1, (int)floor(measurement / bin_depth_));
-    ROS_ASSERT(idx >= 0);
+    assert(idx >= 0);
     total_numerators_(idx) += ground_truth * ground_truth;
     total_denominators_(idx) += ground_truth * measurement;
     ++counts_(idx);
@@ -65,7 +71,7 @@ namespace clams
     double mult = coeff0 * multipliers_.coeffRef(idx0) + coeff1 * multipliers_.coeffRef(idx1);
     *z *= mult;
   }
-
+  
   void DiscreteFrustum::serialize(std::ostream& out) const
   {
     eigen_extensions::serializeScalar(max_dist_, out);
@@ -95,7 +101,6 @@ namespace clams
 
   DiscreteDepthDistortionModel& DiscreteDepthDistortionModel::operator=(const DiscreteDepthDistortionModel& other)
   {
-    proj_ = other.proj_;
     width_ = other.width_;
     height_ = other.height_;
     bin_width_ = other.bin_width_;
@@ -112,19 +117,21 @@ namespace clams
     return *this;
   }
 
-  DiscreteDepthDistortionModel::DiscreteDepthDistortionModel(const FrameProjector& proj,
-                                                             int bin_width, int bin_height, double bin_depth,
+  DiscreteDepthDistortionModel::DiscreteDepthDistortionModel(int width, int height,
+                                                             int bin_width, int bin_height,
+                                                             double bin_depth,
                                                              int smoothing) :
-    proj_(proj),
+    width_(width),
+    height_(height),
     bin_width_(bin_width),
     bin_height_(bin_height),
     bin_depth_(bin_depth)
   {
-    ROS_ASSERT(proj_.width_ % bin_width_ == 0);
-    ROS_ASSERT(proj_.height_ % bin_height_ == 0);
+    assert(width_ % bin_width_ == 0);
+    assert(height_ % bin_height_ == 0);
 
-    num_bins_x_ = proj_.width_ / bin_width_;
-    num_bins_y_ = proj_.height_ / bin_height_;
+    num_bins_x_ = width_ / bin_width_;
+    num_bins_y_ = height_ / bin_height_;
   
     frustums_.resize(num_bins_y_);
     for(size_t i = 0; i < frustums_.size(); ++i) {
@@ -147,51 +154,48 @@ namespace clams
     deleteFrustums();
   }
 
-  void DiscreteDepthDistortionModel::undistort(Frame* frame) const
+  void DiscreteDepthDistortionModel::undistort(DepthMat* depth) const
   {
-    ROS_ASSERT(proj_.width_ == frame->depth_->cols());
-    ROS_ASSERT(proj_.height_ == frame->depth_->rows());
+    assert(width_ == depth->cols());
+    assert(height_ ==depth->rows());
 
-    ProjectivePoint ppt;
-    Point pt;
-#pragma omp parallel for
-    for(int v = 0; v < proj_.height_; ++v) {
-      for(int u = 0; u < proj_.width_; ++u) {
-        if(frame->depth_->coeffRef(v, u) == 0)
+    #pragma omp parallel for
+    for(int v = 0; v < height_; ++v) {
+      for(int u = 0; u < width_; ++u) {
+        if(depth->coeffRef(v, u) == 0)
           continue;
 
-        double z = frame->depth_->coeffRef(v, u) * 0.001;
+        double z = depth->coeffRef(v, u) * 0.001;
         frustum(v, u).interpolatedUndistort(&z);
-        frame->depth_->coeffRef(v, u) = z * 1000;
+        depth->coeffRef(v, u) = z * 1000;
       }
     }
   }
 
-  void DiscreteDepthDistortionModel::addExample(const ProjectivePoint& ppt, double ground_truth, double measurement)
+  void DiscreteDepthDistortionModel::addExample(int v, int u, double ground_truth, double measurement)
   {
-    frustum(ppt.v_, ppt.u_).addExample(ground_truth, measurement);
+    frustum(v, u).addExample(ground_truth, measurement);
   }
 
-  size_t DiscreteDepthDistortionModel::accumulate(const Frame& ground_truth, const Frame& measurement)
+  size_t DiscreteDepthDistortionModel::accumulate(const DepthMat& ground_truth,
+                                                  const DepthMat& measurement)
   {
-    ROS_ASSERT(proj_.width_ == ground_truth.depth_->cols());
-    ROS_ASSERT(proj_.height_ == ground_truth.depth_->rows());
-    ROS_ASSERT(proj_.width_ == measurement.depth_->cols());
-    ROS_ASSERT(proj_.height_ == measurement.depth_->rows());
+    assert(width_ == ground_truth.cols());
+    assert(height_ == ground_truth.rows());
+    assert(width_ == measurement.cols());
+    assert(height_ == measurement.rows());
 
     size_t num_training_examples = 0;
-    ProjectivePoint ppt;
-    Point pt;
-    for(ppt.v_ = 0; ppt.v_ < proj_.height_; ++ppt.v_) {
-      for(ppt.u_ = 0; ppt.u_ < proj_.width_; ++ppt.u_) {
-        if(ground_truth.depth_->coeffRef(ppt.v_, ppt.u_) == 0)
+    for(int v = 0; v < height_; ++v) {
+      for(int u = 0; u < width_; ++u) {
+        if(ground_truth.coeffRef(v, u) == 0)
           continue;
-        if(measurement.depth_->coeffRef(ppt.v_, ppt.u_) == 0)
+        if(measurement.coeffRef(v, u) == 0)
           continue;
 
-        double gt = ground_truth.depth_->coeffRef(ppt.v_, ppt.u_) * 0.001;
-        double meas = measurement.depth_->coeffRef(ppt.v_, ppt.u_) * 0.001;
-        frustum(ppt.v_, ppt.u_).addExample(gt, meas);
+        double gt = ground_truth.coeffRef(v, u) * 0.001;
+        double meas = measurement.coeffRef(v, u) * 0.001;
+        frustum(v, u).addExample(gt, meas);
         ++num_training_examples;
       }
     }
@@ -199,10 +203,35 @@ namespace clams
     return num_training_examples;
   }
 
+  void DiscreteDepthDistortionModel::load(const std::string& path)
+  {
+    ifstream f;
+    f.open(path.c_str());
+    if(!f.is_open()) {
+      cerr << "Failed to open " << path << endl;
+      assert(f.is_open());
+    }
+    deserialize(f);
+    f.close();
+  }
+
+  void DiscreteDepthDistortionModel::save(const std::string& path) const
+  {
+    ofstream f;
+    f.open(path.c_str());
+    if(!f.is_open()) {
+      cerr << "Failed to open " << path << endl;
+      assert(f.is_open());
+    }
+    serialize(f);
+    f.close();
+  }
+  
   void DiscreteDepthDistortionModel::serialize(std::ostream& out) const
   {
     out << "DiscreteDepthDistortionModel v01" << endl;
-    proj_.serialize(out);
+    eigen_extensions::serializeScalar(width_, out);
+    eigen_extensions::serializeScalar(height_, out);
     eigen_extensions::serializeScalar(bin_width_, out);
     eigen_extensions::serializeScalar(bin_height_, out);
     eigen_extensions::serializeScalar(bin_depth_, out);
@@ -218,8 +247,9 @@ namespace clams
   {
     string buf;
     getline(in, buf);
-    ROS_ASSERT(buf == "DiscreteDepthDistortionModel v01");
-    proj_.deserialize(in);
+    assert(buf == "DiscreteDepthDistortionModel v01");
+    eigen_extensions::deserializeScalar(in, &width_);
+    eigen_extensions::deserializeScalar(in, &height_);
     eigen_extensions::deserializeScalar(in, &bin_width_);
     eigen_extensions::deserializeScalar(in, &bin_height_);
     eigen_extensions::deserializeScalar(in, &bin_depth_);
@@ -236,145 +266,11 @@ namespace clams
       }
     }
   }
-
-  void DiscreteDepthDistortionModel::visualize(const std::string& dir) const
-  {
-    if(!bfs::exists(dir))
-      bfs::create_directory(dir);
-    else
-      ROS_ASSERT(bfs::is_directory(dir));
-  
-    const DiscreteFrustum& reference_frustum = *frustums_[0][0];
-    int num_layers = reference_frustum.num_bins_;
-
-    // -- Set up for combined imagery.
-    int horiz_divider = 10;
-    int vert_divider = 20;
-    cv::Mat3b overview(cv::Size(proj_.width_ * 2 + horiz_divider, proj_.height_ * num_layers + vert_divider * (num_layers + 2)), cv::Vec3b(0, 0, 0));
-    vector<int> pub_layers;
-    for(int i = 0; i < num_layers; ++i)
-      pub_layers.push_back(i);
-    // pub_layers.push_back(1);
-    // pub_layers.push_back(2);
-    // pub_layers.push_back(3);
-    cv::Mat3b pub(cv::Size(proj_.width_, proj_.height_ * pub_layers.size() + vert_divider * (pub_layers.size() + 2)), cv::Vec3b(255, 255, 255));
-  
-    for(int i = 0; i < num_layers; ++i) {
-      // -- Determine the path to save the image for this layer.
-      char buffer[50];
-      float mindepth = reference_frustum.bin_depth_ * i;
-      float maxdepth = reference_frustum.bin_depth_ * (i + 1);
-      sprintf(buffer, "%05.2f-%05.2f", mindepth, maxdepth);
-      ostringstream oss;
-      oss << dir << "/multipliers_" << buffer << ".png";
-
-      // -- Compute the multipliers visualization for this layer.
-      //    Multiplier of 1 is black, >1 is red, <1 is blue.  Think redshift.
-      cv::Mat3b mult(cv::Size(proj_.width_, proj_.height_), cv::Vec3b(0, 0, 0));
-      for(int y = 0; y < mult.rows; ++y) {
-        for(int x = 0; x < mult.cols; ++x) {
-          const DiscreteFrustum& frustum = *frustums_[y / bin_height_][x / bin_width_];
-          float val = frustum.multipliers_(i);
-          if(val > 1)
-            mult(y, x)[2] = min(255., 255 * (val - 1.0) / 0.25);
-          if(val < 1)
-            mult(y, x)[0] = min(255., 255 * (1.0 - val) / 0.25);
-        }
-      }
-      cv::imwrite(oss.str(), mult);
-
-      // -- Compute the counts visualization for this layer.
-      //    0 is black, 100 is white.
-      cv::Mat3b count(cv::Size(proj_.width_, proj_.height_), cv::Vec3b(0, 0, 0));
-      for(int y = 0; y < count.rows; ++y) {
-        for(int x = 0; x < count.cols; ++x) {
-          const DiscreteFrustum& frustum = *frustums_[y / bin_height_][x / bin_width_];
-          uchar val = min(255., (double)(255 * frustum.counts_(i) / 100));
-          count(y, x)[0] = val;
-          count(y, x)[1] = val;
-          count(y, x)[2] = val;
-        }
-      }
-      oss.str("");
-      oss << dir << "/counts_" << buffer << ".png";
-      cv::imwrite(oss.str(), count);
-
-      // -- Make images showing the two, side-by-side.
-      cv::Mat3b combined(cv::Size(proj_.width_ * 2 + horiz_divider, proj_.height_), cv::Vec3b(0, 0, 0));
-      for(int y = 0; y < combined.rows; ++y) {
-        for(int x = 0; x < combined.cols; ++x) {
-          if(x < count.cols)
-            combined(y, x) = count(y, x);
-          else if(x > count.cols + horiz_divider)
-            combined(y, x) = mult(y, x - count.cols - horiz_divider);
-        }
-      }
-      oss.str("");
-      oss << dir << "/combined_" << buffer << ".png";
-      cv::imwrite(oss.str(), combined);
-
-      // -- Append to the overview image.
-      for(int y = 0; y < combined.rows; ++y)
-        for(int x = 0; x < combined.cols; ++x)
-          overview(y + i * (combined.rows + vert_divider) + vert_divider, x) = combined(y, x);
-
-      // -- Compute the publication multipliers visualization for this layer.
-      //    Multiplier of 1 is white, >1 is red, <1 is blue.  Think redshift.
-      cv::Mat3b pubmult(cv::Size(proj_.width_, proj_.height_), cv::Vec3b(255, 255, 255));
-      for(int y = 0; y < pubmult.rows; ++y) {
-        for(int x = 0; x < pubmult.cols; ++x) {
-          const DiscreteFrustum& frustum = *frustums_[y / bin_height_][x / bin_width_];
-          float val = frustum.multipliers_(i);
-          if(val > 1) {
-            pubmult(y, x)[0] = 255 - min(255., 255 * (val - 1.0) / 0.1);
-            pubmult(y, x)[1] = 255 - min(255., 255 * (val - 1.0) / 0.1);
-          }
-          if(val < 1) {
-            pubmult(y, x)[1] = 255 - min(255., 255 * (1.0 - val) / 0.1);
-            pubmult(y, x)[2] = 255 - min(255., 255 * (1.0 - val) / 0.1);
-          }
-        }
-      }
-  
-      // -- Append to publication image.
-      for(size_t j = 0; j < pub_layers.size(); ++j)
-        if(pub_layers[j] == i)
-          for(int y = 0; y < pubmult.rows; ++y)
-            for(int x = 0; x < pubmult.cols; ++x)
-              pub(y + j * (pubmult.rows + vert_divider) + vert_divider, x) = pubmult(y, x);
-    }
-  
-    // -- Add a white bar at the top and bottom for reference.
-    for(int y = 0; y < overview.rows; ++y)
-      if(y < vert_divider || y > overview.rows - vert_divider)
-        for(int x = 0; x < overview.cols; ++x)
-          overview(y, x) = cv::Vec3b(255, 255, 255);
-  
-    // -- Save overview image.
-    ostringstream oss;
-    oss << dir << "/overview.png";
-    cv::imwrite(oss.str(), overview);
-
-    // -- Save a small version for easy loading.
-    cv::Mat3b overview_scaled;
-    cv::resize(overview, overview_scaled, cv::Size(), 0.2, 0.2, cv::INTER_CUBIC);
-    oss.str("");
-    oss << dir << "/overview_scaled.png";
-    cv::imwrite(oss.str(), overview_scaled);
-
-    // -- Save publication image.
-    oss.str("");
-    oss << dir << "/pub";
-    // for(size_t i = 0; i < pub_layers.size(); ++i)
-    //   oss << "-" << setw(2) << setfill('0') << pub_layers[i];
-    oss << ".png";
-    cv::imwrite(oss.str(), pub);
-  }
   
   DiscreteFrustum& DiscreteDepthDistortionModel::frustum(int y, int x)
   {
-    ROS_ASSERT(x >= 0 && x < proj_.width_);
-    ROS_ASSERT(y >= 0 && y < proj_.height_);
+    assert(x >= 0 && x < width_);
+    assert(y >= 0 && y < height_);
     int xidx = x / bin_width_;
     int yidx = y / bin_height_;
     return (*frustums_[yidx][xidx]);
@@ -382,8 +278,8 @@ namespace clams
 
   const DiscreteFrustum& DiscreteDepthDistortionModel::frustum(int y, int x) const
   {
-    ROS_ASSERT(x >= 0 && x < proj_.width_);
-    ROS_ASSERT(y >= 0 && y < proj_.height_);
+    assert(x >= 0 && x < width_);
+    assert(y >= 0 && y < height_);
     int xidx = x / bin_width_;
     int yidx = y / bin_height_;
     return (*frustums_[yidx][xidx]);

@@ -29,6 +29,7 @@ endif()
 #common commands for building c++ executables and libraries
 rosbuild_add_library(clams
   src/lib/discrete_depth_distortion_model.cpp
+  src/lib/discrete_depth_distortion_model_helpers.cpp
   src/lib/slam_calibrator.cpp
   src/lib/trajectory.cpp
   )

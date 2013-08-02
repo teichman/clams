@@ -24,10 +24,6 @@ bool Lockable::trylock()
 }
 
 
-SharedLockable::SharedLockable()
-{
-}
-
 void SharedLockable::lockWrite()
 {
   shared_mutex_.lock();

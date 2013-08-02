@@ -18,7 +18,7 @@
 class SharedLockable
 {
 public:
-  SharedLockable();
+  SharedLockable() {}
   //! Copy constructor will make a new shared_mutex that is unlocked.
   SharedLockable(const SharedLockable& other) {}
   //! Assignment operator will *not* copy the shared_mutex_ or the state of shared_mutex_ from other.

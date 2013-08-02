@@ -1,20 +1,51 @@
 #ifndef DISCRETE_DEPTH_DISTORTION_MODEL_H
 #define DISCRETE_DEPTH_DISTORTION_MODEL_H
 
-#include <ros/assert.h>
-#include <ros/console.h>
-#include <boost/shared_ptr.hpp>
-#include <bag_of_tricks/lockable.h>
-#include <stream_sequence/frame_projector.h>
+#include <assert.h>
+#include <vector>
+#include <boost/thread/shared_mutex.hpp>
+#include <eigen_extensions/eigen_extensions.h>
 
 namespace clams
 {
 
-  class DiscreteFrustum : public Serializable, public SharedLockable
+  typedef Eigen::Matrix<unsigned short, Eigen::Dynamic, Eigen::Dynamic> DepthMat;
+
+/* SharedLockable is based on the uncopyable boost::shared_mutex.
+   This presents a dilemma when assigning or copy constructing.
+   Right now, the state of the mutex in the other SharedLockable
+   does not get copied to the target SharedLockable.
+   I'm not sure yet if this is the desired behavior.
+*/
+  class SharedLockable
+  {
+  public:
+    SharedLockable() {}
+    //! Copy constructor will make a new shared_mutex that is unlocked.
+    SharedLockable(const SharedLockable& other) {}
+    //! Assignment operator will *not* copy the shared_mutex_ or the state of shared_mutex_ from other.
+    SharedLockable& operator=(const SharedLockable& other) { return *this; }
+
+    // void lockWrite();
+    // void unlockWrite();
+    // bool trylockWrite();
+  
+    // void lockRead();
+    // void unlockRead();
+    // bool trylockRead();
+
+  protected:
+    //! For the first time ever, I'm tempted to make this mutable.
+    //! It'd make user methods still be able to be const even if they are locking.
+    boost::shared_mutex shared_mutex_;
+  };
+  
+  class DiscreteFrustum : public SharedLockable
   {
   public:
     DiscreteFrustum(int smoothing = 1, double bin_depth = 1.0);
     //! z value, not distance to origin.
+    //! thread-safe.
     void addExample(double ground_truth, double measurement);
     int index(double z) const;
     void undistort(double* z) const;
@@ -34,21 +65,23 @@ namespace clams
     friend class DiscreteDepthDistortionModel;
   };
 
-  class DiscreteDepthDistortionModel : public Serializable
+  class DiscreteDepthDistortionModel
   {
   public:
     typedef boost::shared_ptr<DiscreteDepthDistortionModel> Ptr;
     typedef boost::shared_ptr<const DiscreteDepthDistortionModel> ConstPtr;
     DiscreteDepthDistortionModel() {}
     ~DiscreteDepthDistortionModel();
-    DiscreteDepthDistortionModel(const FrameProjector& proj, int bin_width = 8, int bin_height = 6, double bin_depth = 2.0, int smoothing = 1);
+    DiscreteDepthDistortionModel(int width, int height, int bin_width = 8, int bin_height = 6, double bin_depth = 2.0, int smoothing = 1);
     DiscreteDepthDistortionModel(const DiscreteDepthDistortionModel& other);
     DiscreteDepthDistortionModel& operator=(const DiscreteDepthDistortionModel& other);
-    void undistort(Frame* frame) const;
+    void undistort(DepthMat* depth) const;
     //! Returns the number of training examples it used from this pair.
     //! Thread-safe.
-    size_t accumulate(const Frame& ground_truth, const Frame& measurement);
-    void addExample(const ProjectivePoint& ppt, double ground_truth, double measurement);
+    size_t accumulate(const DepthMat& ground_truth, const DepthMat& measurement);
+    void addExample(int v, int u, double ground_truth, double measurement);
+    void save(const std::string& path) const;
+    void load(const std::string& path);
     void serialize(std::ostream& out) const;
     void deserialize(std::istream& in);
     //! Saves images to the directory found at path.
@@ -56,11 +89,15 @@ namespace clams
     void visualize(const std::string& path) const;
   
   protected:
-    FrameProjector proj_;
+    //! Image width.
     int width_;
+    //! Image height.
     int height_;
+    //! Width of each bin in pixels.
     int bin_width_;
+    //! Height of each bin in pixels.
     int bin_height_;
+    //! Depth of each bin in meters.
     double bin_depth_;
     int num_bins_x_;
     int num_bins_y_;
