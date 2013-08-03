@@ -176,6 +176,25 @@ namespace clams
       sseq.proj_.estimateMapDepth(map, traj.get(idx).inverse().cast<float>(),
                                   measurement, mapframe.depth_.get());
       counts[i] = model->accumulate(*mapframe.depth_, *measurement.depth_);
+
+      // -- Quick and dirty option for data inspection.
+      if(getenv("U") && getenv("V")) {
+        int u_center = atoi(getenv("U"));
+        int v_center = atoi(getenv("V"));
+        int radius = 1;
+        for(int u = max(0, u_center - radius); u < min(640, u_center + radius + 1); ++u) {
+          for(int v = max(0, v_center - radius); v < min(480, v_center + radius + 1); ++v) {
+            if(mapframe.depth_->coeffRef(v, u) == 0)
+              continue;
+            if(measurement.depth_->coeffRef(v, u) == 0)
+              continue;
+            cerr << mapframe.depth_->coeffRef(v, u) * 0.001
+                 << " "
+                 << measurement.depth_->coeffRef(v, u) * 0.001
+                 << endl;
+          }
+        }
+      }
     }
 
     return counts.sum();
