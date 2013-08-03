@@ -8,7 +8,9 @@ release/built: git
 # HTTPS clone is not working on some machines.  Unclear why.  Using ssh (which requires  as a fallback.
 git:
 	@git clone https://github.com/PointCloudLibrary/pcl.git git; \
-	if [ $$? -ne 0 ]; then \
+	RES=$$?; \
+	sleep 1; \
+	if [ $$RES -ne 0 ]; then \
 	echo Using ssh fallback.; \
 	git clone git@github.com:PointCloudLibrary/pcl.git git; \
 	fi
@@ -17,5 +19,5 @@ git:
 clean:
 	cd release && make clean
 
-wipe: clean
+wipe:
 	rm -rf release git
