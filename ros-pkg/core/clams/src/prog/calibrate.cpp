@@ -13,18 +13,13 @@ int main(int argc, char** argv)
   bpo::options_description opts_desc("Allowed options");
   bpo::positional_options_description p;
 
-  //vector<string> paths;
   vector<string> sequence_paths;
   vector<string> trajectory_paths;
   opts_desc.add_options()
     ("help,h", "produce help message")
     ("sseqs", bpo::value(&sequence_paths)->required()->multitoken(), "StreamSequences, i.e. asus data.")
     ("trajs", bpo::value(&trajectory_paths)->required()->multitoken(), "Trajectories from slam.")
-    //    ("paths", bpo::value< vector<string> >(&paths)->required()->multitoken(), "Recorded logs and trajectories")
     ;
-
-
-  //p.add("paths", -1);
 
     bpo::variables_map opts;
   bool badargs = false;
@@ -39,15 +34,6 @@ int main(int argc, char** argv)
     cout << opts_desc << endl;
     return 1;
   }
-
-  // vector<string> sequence_paths;
-  // vector<string> trajectory_paths;
-  // for(size_t i = 0; i < paths.size(); ++i) {
-  //   if(i % 2 == 0)
-  //     sequence_paths.push_back(paths[i]);
-  //   else
-  //     trajectory_paths.push_back(paths[i]);
-  // }
 
   ROS_ASSERT(sequence_paths.size() == trajectory_paths.size());
   cout << "Using sequence / trajectory pairs: " << endl;

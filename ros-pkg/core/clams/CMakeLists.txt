@@ -47,3 +47,6 @@ target_link_libraries(calibrate clams)
 
 rosbuild_add_executable(visualize_model src/prog/visualize_model.cpp)
 target_link_libraries(visualize_model clams)
+
+rosbuild_add_executable(convert_trajectory src/prog/convert_trajectory.cpp)
+target_link_libraries(convert_trajectory clams)
