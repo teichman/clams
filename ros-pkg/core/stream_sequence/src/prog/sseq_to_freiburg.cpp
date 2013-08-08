@@ -48,35 +48,24 @@ int main(int argc, char** argv)
   for(size_t i = 0; i < sseq->size(); ++i) {
     cout << i << " / " << sseq->size() << endl;
     sseq->readFrame(i, &frame);
+    ros::Time ts(sseq->timestamps_[i]);
+    
     ostringstream ossrgb;
-    ossrgb << dst << "/rgb/"
-        << setiosflags(ios::fixed) << setprecision(6) << setfill('0') << setw(16)
-        << sseq->timestamps_[i] << ".png";
+    ossrgb << dst << "/rgb/" << ts << ".png";
     cv::imwrite(ossrgb.str(), frame.img_);
 
     cv::Mat_<ushort> depth(cv::Size(frame.depth_->cols(), frame.depth_->rows()), 0);
-    for(int y = 0; y < depth.rows; ++y) {
-      for(int x = 0; x < depth.cols; ++x) {
-        depth(y, x) = frame.depth_->coeffRef(y, x);
-      }
-    }
+    // Freiburg data is 5 units / mm, ours is 1 / mm.
+    for(int y = 0; y < depth.rows; ++y)
+      for(int x = 0; x < depth.cols; ++x)
+        depth(y, x) = frame.depth_->coeffRef(y, x) * 5;  
 
     ostringstream ossd;
-    ossd << dst << "/depth/"
-        << setiosflags(ios::fixed) << setprecision(6) << setfill('0') << setw(16)
-        << sseq->timestamps_[i] << ".png";
+    ossd << dst << "/depth/" << ts << ".png";
     cv::imwrite(ossd.str(), depth);
-    cout << "Saved to " << ossd.str() << endl;
 
-    // There must be a better way.
-    assoc << setiosflags(ios::fixed) << setprecision(6) << setfill('0') << setw(16)
-          << sseq->timestamps_[i] << " rgb/"
-          << setiosflags(ios::fixed) << setprecision(6) << setfill('0') << setw(16)
-          << sseq->timestamps_[i] << ".png "
-          << setiosflags(ios::fixed) << setprecision(6) << setfill('0') << setw(16)
-          << sseq->timestamps_[i] << " depth/"
-          << setiosflags(ios::fixed) << setprecision(6) << setfill('0') << setw(16)
-          << sseq->timestamps_[i] << ".png" << endl;
+    assoc << ts << " rgb/" << ts << ".png "
+          << ts << " depth/" << ts << ".png" << endl;
   }
 
   assoc.close();
