@@ -38,3 +38,6 @@ rosbuild_add_compile_flags(stream_sequence -Wno-deprecated -Wno-unused-but-set-v
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
+
+rosbuild_add_executable(sseq_to_freiburg src/prog/sseq_to_freiburg.cpp)
+target_link_libraries(sseq_to_freiburg stream_sequence)
