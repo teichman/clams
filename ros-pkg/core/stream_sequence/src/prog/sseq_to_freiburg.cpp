@@ -43,15 +43,16 @@ int main(int argc, char** argv)
   bfs::create_directory(dst + "/depth");
   bfs::create_directory(dst + "/rgb");
   Frame frame;
+  ofstream assoc;
+  assoc.open((dst + "/assoc.txt").c_str());
   for(size_t i = 0; i < sseq->size(); ++i) {
     cout << i << " / " << sseq->size() << endl;
     sseq->readFrame(i, &frame);
-    ostringstream oss;
-    
-    oss << dst << "/rgb/"
+    ostringstream ossrgb;
+    ossrgb << dst << "/rgb/"
         << setiosflags(ios::fixed) << setprecision(6) << setfill('0') << setw(16)
         << sseq->timestamps_[i] << ".png";
-    cv::imwrite(oss.str(), frame.img_);
+    cv::imwrite(ossrgb.str(), frame.img_);
 
     cv::Mat_<ushort> depth(cv::Size(frame.depth_->cols(), frame.depth_->rows()), 0);
     for(int y = 0; y < depth.rows; ++y) {
@@ -59,13 +60,26 @@ int main(int argc, char** argv)
         depth(y, x) = frame.depth_->coeffRef(y, x);
       }
     }
-    oss.str("");
-    oss << dst << "/depth/"
+
+    ostringstream ossd;
+    ossd << dst << "/depth/"
         << setiosflags(ios::fixed) << setprecision(6) << setfill('0') << setw(16)
         << sseq->timestamps_[i] << ".png";
-    cv::imwrite(oss.str(), depth);
-    cout << "Saved to " << oss.str() << endl;
+    cv::imwrite(ossd.str(), depth);
+    cout << "Saved to " << ossd.str() << endl;
+
+    // There must be a better way.
+    assoc << setiosflags(ios::fixed) << setprecision(6) << setfill('0') << setw(16)
+          << sseq->timestamps_[i] << " rgb/"
+          << setiosflags(ios::fixed) << setprecision(6) << setfill('0') << setw(16)
+          << sseq->timestamps_[i] << ".png "
+          << setiosflags(ios::fixed) << setprecision(6) << setfill('0') << setw(16)
+          << sseq->timestamps_[i] << " depth/"
+          << setiosflags(ios::fixed) << setprecision(6) << setfill('0') << setw(16)
+          << sseq->timestamps_[i] << ".png" << endl;
   }
+
+  assoc.close();
 
   return 0;
 }
