@@ -14,7 +14,7 @@ namespace clams
     needs_update_(false),
     seq_idx_(0),
     frame_idx_(0),
-    show_frame_(true),
+    show_frame_(false),
     use_distortion_model_(false),
     color_frame_(false)
   {

@@ -41,7 +41,7 @@ rosbuild_add_boost_directories()
 rosbuild_link_boost(clams program_options)
 
 rosbuild_add_executable(inspect src/prog/inspect.cpp)
-target_link_libraries(inspect clams)
+target_link_libraries(inspect clams vtkCommon vtkFiltering vtkRendering)
 
 rosbuild_add_executable(calibrate src/prog/calibrate.cpp)
 target_link_libraries(calibrate clams)

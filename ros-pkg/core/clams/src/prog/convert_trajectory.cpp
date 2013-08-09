@@ -60,9 +60,6 @@ int main(int argc, char** argv)
     Translation<double, 3> translation(tx, ty, tz);
     Affine3d transform = translation * rotation;
     traj.set(idx, transform);
-    // cout << endl;
-    // cout << "idx: " << idx << endl;
-    // cout << transform.matrix() << endl;
   }
 
   traj.save(dst);
