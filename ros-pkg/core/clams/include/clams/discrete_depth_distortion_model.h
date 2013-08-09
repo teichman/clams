@@ -26,13 +26,13 @@ namespace clams
     //! Assignment operator will *not* copy the shared_mutex_ or the state of shared_mutex_ from other.
     SharedLockable& operator=(const SharedLockable& other) { return *this; }
 
-    // void lockWrite();
-    // void unlockWrite();
-    // bool trylockWrite();
+    void lockWrite() { shared_mutex_.lock(); }
+    void unlockWrite() { shared_mutex_.unlock(); }
+    bool trylockWrite() { return shared_mutex_.try_lock(); }
   
-    // void lockRead();
-    // void unlockRead();
-    // bool trylockRead();
+    void lockRead() { shared_mutex_.lock_shared(); }
+    void unlockRead() { shared_mutex_.unlock_shared(); }
+    bool trylockRead() { return shared_mutex_.try_lock_shared(); }
 
   protected:
     //! For the first time ever, I'm tempted to make this mutable.

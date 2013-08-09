@@ -31,6 +31,7 @@ rosbuild_add_library(clams
   src/lib/discrete_depth_distortion_model.cpp
   src/lib/discrete_depth_distortion_model_helpers.cpp
   src/lib/slam_calibrator.cpp
+  src/lib/slam_calibration_visualizer.cpp
   src/lib/trajectory.cpp
   )
 
@@ -50,3 +51,6 @@ target_link_libraries(visualize_model clams)
 
 rosbuild_add_executable(convert_trajectory src/prog/convert_trajectory.cpp)
 target_link_libraries(convert_trajectory clams)
+
+rosbuild_add_executable(visualize_trajectory src/prog/visualize_trajectory.cpp)
+target_link_libraries(visualize_trajectory clams)
