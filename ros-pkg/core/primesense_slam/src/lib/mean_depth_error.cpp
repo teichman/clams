@@ -204,7 +204,7 @@ namespace clams
     //cv::imshow("edges", edges0_); 
     //cv::waitKey(30);
     // Load the color_names lookup table
-    eigen_extensions::load(ros::package::getPath("xpl_calibration") + "/data/w2c.eig", 
+    eigen_extensions::load(ros::package::getPath("primesense_slam") + "/data/w2c.eig", 
                            &color_names_);
 
   }

@@ -149,22 +149,19 @@ namespace clams
     Eigen::ArrayXd x = gs.search(init);
 
     // -- Print out statistics.
-    cout << "============================== Frame alignment complete" << endl;
-    cout << "GridSearch solution: " << x.transpose() << endl;
-    cout << "Computed " << gs.num_evals_ << " evals in " << gs.time_ << " seconds." << endl;
-    cout << gs.num_evals_ / gs.time_ << " evals / second." << endl;
-    cout << gs.time_ / gs.num_evals_ << " seconds / eval." << endl;
+    cout << "Frame alignment complete.  Stats:" << endl;
+    cout << "  Computed " << gs.num_evals_ << " evals in " << gs.time_ << " seconds." << endl;
+    cout << "  " << gs.num_evals_ / gs.time_ << " evals / second." << endl;
+    cout << "  " << gs.time_ / gs.num_evals_ << " seconds / eval." << endl;
 
     double count, depth_error;
     mde->count_ = &count;
     mde->depth_error_ = &depth_error;
     double final_objective = mde->eval(x);
   
-    cout << " -- Single-number statistics" << endl;
-    cout << "Final objective: " << final_objective << endl;
-    cout << "Depth error: " << depth_error << endl;
-    cout << "Count: " << count << endl;
-    cout << "==============================" << endl;
+    cout << "  Final objective: " << final_objective << endl;
+    cout << "  Depth error: " << depth_error << endl;
+    cout << "  Count: " << count << endl;
 
     *f0_to_f1 = generateTransform(x(0), x(1), x(2), x(3), x(4), x(5)).cast<double>();
     return validate(count, depth_error);
@@ -337,7 +334,7 @@ namespace clams
         continue;
       candidates.push_back(trans);
     }
-    cout << "Have " << candidates.size() << " candidates after RANSAC, before inlier check" << endl;
+    //cout << "Have " << candidates.size() << " candidates after RANSAC, before inlier check" << endl;
     //Do inlier check
     // SDM for now leaving this in to filter out infinite points
     Cloud::Ptr keypoint_cloud0(new Cloud);
@@ -468,10 +465,10 @@ namespace clams
         best_inliers = inliers;
         has_best = true;
 
-        cout << "Best so far: " << endl;
-        cout << "  Num inliers: " << num_inliers << endl;
-        cout << "  Has bounding size of x: " << maxx - minx << ", y: " << maxy - miny << ", z: " << maxz - minz << endl;
-        cout << "  f1_to_f0: " << endl << best_transform.matrix() << endl;
+        // cout << "Best so far: " << endl;
+        // cout << "  Num inliers: " << num_inliers << endl;
+        // cout << "  Has bounding size of x: " << maxx - minx << ", y: " << maxy - miny << ", z: " << maxz - minz << endl;
+        // cout << "  f1_to_f0: " << endl << best_transform.matrix() << endl;
       }
     }
     if(has_best)
@@ -483,8 +480,8 @@ namespace clams
                 keypoint_cloud0->points[best_inliers[j].second].getVector3fMap());
       Affine3d f1_to_f0 = tfc.getTransformation().cast<double>();
       *f0_to_f1 = f1_to_f0.inverse();
-      cout << "Final f1_to_f0: " << endl;
-      cout << f1_to_f0.matrix() << endl;
+      // cout << "Final f1_to_f0: " << endl;
+      // cout << f1_to_f0.matrix() << endl;
       return true;
     }
     else
@@ -529,7 +526,7 @@ namespace clams
     foo_ = false;
     f0_to_f1_ = generateTransform(x(0), x(1), x(2), x(3), x(4), x(5));
     needs_update_ = true;
-    cout << "Grid search improvement: " << objective << " at x = " << x.transpose() << endl;
+    //cout << "Grid search improvement: " << objective << " at x = " << x.transpose() << endl;
   }
 
   void FrameAlignmentVisualizer::_run()

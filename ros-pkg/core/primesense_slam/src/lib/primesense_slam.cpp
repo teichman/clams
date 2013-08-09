@@ -53,9 +53,11 @@ namespace clams
         dt = sseq_->timestamps_[curr_idx] - prev_frame.timestamp_;
       }
       if(done) break;
-      cout << "---------- Searching for link between " << prev_idx << " and " << curr_idx
-           << " / " << sseq_->size() << endl;
-      cout << "           dt: " << dt << endl;
+      // cout << "=====" << endl;
+      // cout << "== Searching for link between " << prev_idx << " and " << curr_idx
+      //      << " / " << sseq_->size() << endl;
+      // cout << "=====" << endl;
+      // cout << "dt: " << dt << endl;
       sseq_->readFrame(prev_idx, &prev_frame);  // TODO: This should not be necessary.      
       sseq_->readFrame(curr_idx, &curr_frame);
       if(intrinsics_) {
@@ -81,7 +83,8 @@ namespace clams
                                  curr_features, feature_cache_[prev_idx],
                                  true, &curr_to_prev);
       if(found) {
-        cout << "Added edge " << prev_idx << " -- " << curr_idx << endl;
+        cout << "==== Added odometry edge " << prev_idx << " -- " << curr_idx << ".  "
+             << "Total frames in sequence: " << sseq_->size() <<  endl;
         pgs_->addEdge(prev_idx, curr_idx, curr_to_prev, covariance);
       }
 
@@ -141,7 +144,9 @@ namespace clams
             curr_frame, old_frame,
             correspondences0[i], correspondences1[i], guesses[i], &curr_to_old);
           if(found) {
-            cout << "Added edge " << idx << " -- " << curr_idx << endl;
+            cout << "==== Added loop closure edge " << idx << " -- " << curr_idx << ".  "
+                 << "Total frames in sequence: " << sseq_->size() << endl;
+            
             pgs_->addEdge(idx, curr_idx, curr_to_old, covariance);
             ++num_successful_loopclosures;
             if(num_successful_loopclosures >= max_loopclosures_)

@@ -14,22 +14,16 @@ int main(int argc, char** argv)
   bpo::positional_options_description p;
 
   string sseq_path;
-  string pcd_path;
-  string traj_path;
-  string graph_path;
+  string output_dir;
   opts_desc.add_options()
     ("help,h", "produce help message")
     ("sseq", bpo::value(&sseq_path)->required(), "StreamSequence, i.e. asus data.")
-    ("opcd", bpo::value(&pcd_path)->required(), "Output DIR for the final pointcloud.")
-    ("otraj", bpo::value(&traj_path)->required(), "Output DIR for the final trajectory.")
-    ("ograph", bpo::value(&graph_path)->required(), "Output PATH for the final pose graph.")
+    ("output-dir", bpo::value(&output_dir)->required(), "Directory to put output files in.")
     ("max-loopclosures", bpo::value<int>())
     ;
 
   p.add("sseq", 1);
-  p.add("opcd", 1);
-  p.add("otraj", 1);
-  p.add("ograph", 1);
+  p.add("output-dir", 1);
   
   bpo::variables_map opts;
   bpo::store(bpo::command_line_parser(argc, argv).options(opts_desc).positional(p).run(), opts);
@@ -44,8 +38,8 @@ int main(int argc, char** argv)
   }
 
   cout << "Using " << sseq_path << endl;
-  cout << "Saving final map at " << pcd_path << endl;
-  ROS_ASSERT(!bfs::exists(pcd_path));
+  cout << "Saving output in " << output_dir << endl;
+  ROS_ASSERT(!bfs::exists(output_dir));
   StreamSequenceBase::Ptr sseq = StreamSequenceBase::initializeFromDirectory(sseq_path);
 
   PrimeSenseSlam pss;
@@ -58,7 +52,7 @@ int main(int argc, char** argv)
   // -- Run slam.
   ThreadPtr slamthread = pss.launch();
   slamthread->join();
-  pss.pgs_->save(graph_path);
+  pss.pgs_->save(output_dir + "/graph");
   
   // -- Find the largest subgraph.
   vector< pair<size_t, size_t> > index(pss.trajs_.size());
@@ -67,21 +61,20 @@ int main(int argc, char** argv)
   sort(index.begin(), index.end(), std::greater< pair<size_t, size_t> >());  // Descending sort.
 
   // -- Save outputs in order of size.
-  boost::filesystem::path dir(pcd_path);
-  boost::filesystem::create_directory(dir);
+  if(!bfs::exists(output_dir))
+    boost::filesystem::create_directory(output_dir);
+  
   for(size_t i = 0; i < index.size(); ++i) {
     size_t idx = index[i].first;
     ostringstream oss;
-    oss << pcd_path << "/submap_" << i << ".pcd";
+    oss << output_dir << "/map_" << i << ".pcd";
     pcl::io::savePCDFileBinary(oss.str(), *pss.maps_[idx]);
   }
 
-  boost::filesystem::path dir(traj_path);
-  boost::filesystem::create_directory(dir);
   for(size_t i = 0; i < index.size(); ++i) {
     size_t idx = index[i].first;
     ostringstream oss;
-    oss << traj_path << "/submap_" << i << ".traj";
+    oss << output_dir << "/traj_" << i << ".traj";
     pss.trajs_[idx].save(oss.str());
   }
   
