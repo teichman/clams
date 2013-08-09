@@ -25,7 +25,6 @@ int main(int argc, char** argv)
     ("opcd", bpo::value(&pcd_path)->required(), "Output DIR for the final pointcloud.")
     ("otraj", bpo::value(&traj_path)->required(), "Output DIR for the final trajectory.")
     ("ograph", bpo::value(&graph_path)->required(), "Output PATH for the final pose graph.")
-    ("visualize", "")
     ;
 
   p.add("sseq", 1);
@@ -55,12 +54,9 @@ int main(int argc, char** argv)
     pss.max_loopclosures_ = opts["max-loopclosures"].as<int>();
     cout << "Using " << pss.max_loopclosures_ << " loop closures per frame maximum." << endl;
   pss.sseq_ = sseq;
-  FrameAlignmentVisualizer fav(sseq->model_, sseq->model_);
-  if(opts.count("visualize"))
-    pss.fav_ = &fav;
+
+  // -- Run slam.
   ThreadPtr slamthread = pss.launch();
-  if(opts.count("visualize"))
-    fav.run();
   slamthread->join();
 
   // -- Find the largest subgraph.
