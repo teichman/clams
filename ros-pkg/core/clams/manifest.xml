@@ -14,7 +14,7 @@
 
   <export>
     <cpp cflags="-I${prefix}/include -fopenmp"
-         lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -fopenmp"/>
+         lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -fopenmp -lclams"/>
   </export>
   
   

@@ -1,0 +1,26 @@
+Params (25)
+int canny_kernel_radius 1
+int canny_lower_thresh 50
+int canny_upper_thresh 125
+double cn_weight 0.02
+double color_weight 0.1
+double depth_weight 2
+int edge_fanout 25
+double edge_weight 0.1
+double fraction 0.1
+string gridsearch_type default
+double hue_weight 0.1
+int k 2
+double keypoint_hinge 50
+double keypoint_weight 0
+double max_depth_error 0.05
+double max_feature_dist 300
+double max_range 10
+double min_bounding_length 0.5
+int min_depth_count 15000
+double min_pairwise_keypoint_dist 0.15
+double min_ransac_inlier_percent 0.5
+int min_ransac_inliers 20
+int num_ransac_samples 5000
+double ransac_max_inlier_dist 0.01
+double rgb_weight 0.05

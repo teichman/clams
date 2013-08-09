@@ -51,12 +51,12 @@ namespace clams
     
     //! Adds dt to all timestamps.  Does not save.
     void applyTimeOffset(double dt);
-    //! Inefficient accessors that conceal ) how the projection is done.
-    //! These shouldn't be used.
-    clams::Cloud::Ptr getCloud(size_t idx) const __attribute__ ((__deprecated__));
-    clams::Cloud::Ptr getCloud(double timestamp, double* dt) const __attribute__ ((__deprecated__));
-    cv::Mat3b getImage(size_t idx) const __attribute__ ((__deprecated__));
-    cv::Mat3b getImage(double timestamp, double* dt) const __attribute__ ((__deprecated__));
+    //! Inefficient accessors that conceal how the projection is done.
+    //! These shouldn't be used if it can be avoided.
+    clams::Cloud::Ptr getCloud(size_t idx) const;
+    clams::Cloud::Ptr getCloud(double timestamp, double* dt) const;
+    cv::Mat3b getImage(size_t idx) const;
+    cv::Mat3b getImage(double timestamp, double* dt) const;
     
   protected:
     friend class StreamSequenceAccessor;

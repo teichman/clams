@@ -2,15 +2,10 @@
 #define PRIMESENSE_SLAM_H
 
 #include <pcl/filters/voxel_grid.h>
-#include <bag_of_tricks/agent.h>
 #include <pose_graph_slam/pose_graph_slam.h>
-#include <rgbd_sequence/stream_sequence_base.h>
-#include <clams/trajectory.h>
-#include <clams/frame_aligner.h>
-#include <clams/discrete_depth_distortion_model.h>
-#include <vector>
-
-#define MAX_RANGE_MAP 2.0
+#include <stream_sequence/stream_sequence_base.h>
+#include <clams/slam_calibrator.h>
+#include <primesense_slam/frame_aligner.h>
 
 namespace clams
 {
@@ -51,11 +46,11 @@ namespace clams
     FeaturesPtr getFeatures(const Frame &frame, std::vector<cv::KeyPoint> &keypoints,
                             Cloud::ConstPtr &keycloud) const;
 
-    pl::Params params_;
-    static inline pl::Params defaultParams()
+    Params params_;
+    static inline Params defaultParams()
     {
-      pl::Params params;
-      params.load(ros::package::getPath("xpl_calibration") + "/data/default_slam_params.txt");
+      Params params;
+      params.load(ros::package::getPath("primesense_slam") + "/data/default_slam_params.txt");
       return params;
     }
 

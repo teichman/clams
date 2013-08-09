@@ -6,6 +6,9 @@
 #include <assert.h>
 #include <vector>
 #include <map>
+#include <yaml-cpp/yaml.h>
+#include <yaml-cpp/node/node.h>
+
 
 /** \brief @b Serializable is an abstract base class which represents
  * objects that can be serialized and deserialized.
@@ -24,6 +27,16 @@ public:
 
 std::ostream& operator<<(std::ostream& out, const Serializable& ser);
 std::istream& operator>>(std::istream& in, Serializable& ser);
+
+class YAMLizable
+{
+public:
+  virtual ~YAMLizable() {};
+  virtual YAML::Node YAMLize() const = 0;
+  virtual void deYAMLize(const YAML::Node& in) = 0;
+  virtual void saveYAML(const std::string& path) const;
+  virtual void loadYAML(const std::string& path);
+};
 
 
 /* Class for making it easy to use stream constructors.

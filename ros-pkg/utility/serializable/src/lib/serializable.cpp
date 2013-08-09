@@ -38,6 +38,26 @@ std::istream& operator>>(std::istream& in, Serializable& ser)
   return in;
 }
 
+void YAMLizable::loadYAML(const std::string& path)
+{
+  YAML::Node doc = YAML::LoadFile(path);
+  deYAMLize(doc);
+}
+
+void YAMLizable::saveYAML(const std::string& path) const
+{
+  ofstream f;
+  f.open(path.c_str());
+  if(!f.is_open()) {
+    cerr << "Failed to open " << path << endl;
+    assert(f.is_open());
+  }
+
+  YAML::Node doc = YAMLize();
+  f << YAML::Dump(doc) << endl;
+  f.close();
+}
+
 IfstreamWrapper::IfstreamWrapper(const std::string& path)
 {
   cout << "Constructing IfstreamWrapper" << endl;

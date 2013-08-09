@@ -9,6 +9,8 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/serializable</url>
 
+  <depend package="yaml_cpp"/>
+  
   <export>
     <cpp cflags="-I${prefix}/include"
 	 lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lserializable" />
