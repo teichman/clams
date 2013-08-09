@@ -3,7 +3,7 @@
 using namespace std;
 using namespace Eigen;
 
-#define NUM_THREADS (getenv("NUM_THREADS") ? atoi(getenv("NUM_THREADS")) : 1)
+//#define NUM_THREADS (getenv("NUM_THREADS") ? atoi(getenv("NUM_THREADS")) : 16)
 
 GridSearch::GridSearch(int num_variables) :
   verbose_(true),
@@ -124,7 +124,7 @@ Eigen::ArrayXd GridSearch::search(const ArrayXd& x)
 
     // -- Try them all in parallel.
     ArrayXd vals(xs.size());
-    omp_set_num_threads(NUM_THREADS);
+    //omp_set_num_threads(NUM_THREADS);
     #pragma omp parallel for
     for(size_t j = 0; j < xs.size(); ++j) { 
       vals(j) = objective_->eval(xs[j]);

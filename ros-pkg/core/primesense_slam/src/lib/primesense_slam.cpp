@@ -1,7 +1,5 @@
 #include <primesense_slam/primesense_slam.h>
 
-#define OMP_THREADS 8
-
 using namespace std;
 using namespace Eigen;
 
@@ -108,7 +106,6 @@ namespace clams
         vector<bool> found_rough(max_attempts, false);
         vector<vector<cv::Point2d> > correspondences0(max_attempts), correspondences1(max_attempts);
         vector<Eigen::Affine3d> guesses(max_attempts);
-        omp_set_num_threads(OMP_THREADS);
 #pragma omp parallel for
         for(size_t i = 0; i < max_attempts; ++i) {
           if(num_rough_transforms >= max_rough_transforms)
