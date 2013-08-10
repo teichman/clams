@@ -13,15 +13,15 @@ int main(int argc, char** argv)
   bpo::options_description opts_desc("Allowed options");
   bpo::positional_options_description p;
 
-  vector<string> sequence_paths;
-  vector<string> trajectory_paths;
+  string workspace;
   opts_desc.add_options()
     ("help,h", "produce help message")
-    ("sseqs", bpo::value(&sequence_paths)->required()->multitoken(), "StreamSequences, i.e. asus data.")
-    ("trajs", bpo::value(&trajectory_paths)->required()->multitoken(), "Trajectories from slam.")
+    ("workspace", bpo::value(&workspace)->required(), "CLAMS workspace.")
     ;
 
-    bpo::variables_map opts;
+  p.add("workspace", 1);
+  
+  bpo::variables_map opts;
   bool badargs = false;
   try {
     bpo::store(bpo::command_line_parser(argc, argv).options(opts_desc).positional(p).run(), opts);
@@ -29,35 +29,53 @@ int main(int argc, char** argv)
   }
   catch(...) { badargs = true; }
   if(opts.count("help") || badargs) {
-    cout << "Usage: " << bfs::basename(argv[0]) << " OPTS --sseqs SSEQ [SSEQ ...] --trajs TRAJ [TRAJ ...]" << endl;
+    cout << "Usage: " << bfs::basename(argv[0]) << " [ OPTS ] CLAMS_WORKSPACE " << endl;
+    cout << "  This program will calibrate using all slam results in CLAMS_WORKSPACE/." << endl;
     cout << endl;
     cout << opts_desc << endl;
     return 1;
   }
 
-  ROS_ASSERT(sequence_paths.size() == trajectory_paths.size());
-  cout << "Using sequence / trajectory pairs: " << endl;
-  vector<Trajectory> trajectories(trajectory_paths.size());
-  vector<StreamSequenceBase::ConstPtr> sseqs;
-  ROS_ASSERT(sequence_paths.size() == trajectory_paths.size());
-  for(size_t i = 0; i < sequence_paths.size(); ++i) {
-    cout << "=== Log " << i << endl;
-    cout << " Sequence: " << sequence_paths[i] << endl;
-    cout << " Trajectory: " << trajectory_paths[i] << endl;
+  // -- Check for existence of CLAMS_WORKSPACE/slam_results.
+  string sequences_path = workspace + "/sequences";
+  string results_path = workspace + "/slam_results";
+  ROS_ASSERT(bfs::exists(results_path));
 
-    trajectories[i].load(trajectory_paths[i]);
-    cout << trajectories[i].status("  ");
-    StreamSequenceBase::Ptr sseq = StreamSequenceBase::initializeFromDirectory(sequence_paths[i]);
-    sseqs.push_back(sseq);
+  // -- Get names of sequences that have corresponding results.
+  vector<string> sseq_names;
+  bfs::directory_iterator it(results_path), eod;
+  BOOST_FOREACH(const bfs::path& p, make_pair(it, eod)) {
+    string path = results_path + "/" + p.leaf().string();
+    if(bfs::is_directory(path))
+      sseq_names.push_back(p.leaf().string());
+  }
+  sort(sseq_names.begin(), sseq_names.end());
+
+  // -- Construct sseqs with corresponding trajectories.
+  vector<StreamSequenceBase::ConstPtr> sseqs;
+  vector<Trajectory> trajs;
+  for(size_t i = 0; i < sseq_names.size(); ++i) { 
+    string sseq_path = sequences_path + "/" + sseq_names[i];
+    string traj_path = results_path + "/" + sseq_names[i] + "/traj_0.traj";  // Just use the biggest submap.
+
+    cout << "Log " << i << endl;
+    cout << "  StreamSequence:" << sseq_path << endl;
+    cout << "  Trajectory: " << traj_path << endl;
+
+    sseqs.push_back(StreamSequenceBase::initializeFromDirectory(sseq_path));
+    Trajectory traj;
+    traj.load(traj_path);
+    trajs.push_back(traj);
   }
 
+  // -- Run the calibrator.
   SlamCalibrator::Ptr calibrator(new SlamCalibrator(sseqs[0]->proj_));
   cout << "Using " << calibrator->max_range_ << " as max range." << endl;
-  calibrator->trajectories_ = trajectories;
+  calibrator->trajectories_ = trajs;
   calibrator->sseqs_ = sseqs;
   
   DiscreteDepthDistortionModel model = calibrator->calibrate();
-  string output_path = "distortion_model";
+  string output_path = workspace + "/distortion_model";
   model.save(output_path);
   cout << "Saved distortion model to " << output_path << endl;
 
