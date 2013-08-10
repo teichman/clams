@@ -28,7 +28,7 @@ int main(int argc, char** argv)
   try { bpo::notify(opts); }
   catch(...) { badargs = true; }
   if(opts.count("help") || badargs) {
-    cout << "Usage: " << bfs::basename(argv[0]) << "[OPTS] CLAMS_WORKSPACE" << endl;
+    cout << "Usage: " << bfs::basename(argv[0]) << " [OPTS] CLAMS_WORKSPACE" << endl;
     cout << "  This program will run slam on all sequences in CLAMS_WORKSPACE/sequences/." << endl;
     cout << "  Results will be placed in CLAMS_WORKSPACE/slam_results/." << endl;
     cout << endl;
