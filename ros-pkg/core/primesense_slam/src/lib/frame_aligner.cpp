@@ -109,22 +109,19 @@ namespace clams
     ArrayXd x = gs.search(ArrayXd::Zero(6));
 
     // -- Print out statistics.
-    cout << "============================== Frame alignment complete" << endl;
-    cout << "GridSearch solution: " << x.transpose() << endl;
-    cout << "Computed " << gs.num_evals_ << " evals in " << gs.time_ << " seconds." << endl;
-    cout << gs.num_evals_ / gs.time_ << " evals / second." << endl;
-    cout << gs.time_ / gs.num_evals_ << " seconds / eval." << endl;
+    cout << "Frame alignment complete.  Stats:" << endl;
+    cout << "  Computed " << gs.num_evals_ << " evals in " << gs.time_ << " seconds." << endl;
+    cout << "  " << gs.num_evals_ / gs.time_ << " evals / second." << endl;
+    cout << "  " << gs.time_ / gs.num_evals_ << " seconds / eval." << endl;
 
     double count, depth_error;
     mde->count_ = &count;
     mde->depth_error_ = &depth_error;
     double final_objective = mde->eval(x);
   
-    cout << " -- Single-number statistics" << endl;
-    cout << "Final objective: " << final_objective << endl;
-    cout << "Depth error: " << depth_error << endl;
-    cout << "Count: " << count << endl;
-    cout << "==============================" << endl;
+    cout << "  Final objective: " << final_objective << endl;
+    cout << "  Depth error: " << depth_error << endl;
+    cout << "  Count: " << count << endl;
 
     *f0_to_f1 = generateTransform(x(0), x(1), x(2), x(3), x(4), x(5)).cast<double>();
     return validate(count, depth_error);
@@ -357,7 +354,6 @@ namespace clams
     vector<int> indices;
     vector<float> distances;
     Eigen::Affine3f best_transform;
-    float best_distance = std::numeric_limits<float>::infinity();
     int best_num_inliers = 0;
     bool has_best = false;
     vector< std::pair<size_t, size_t> > best_inliers;
@@ -460,7 +456,6 @@ namespace clams
       // {
       if(num_inliers > best_num_inliers) {
         best_transform = candidates[j];
-        best_distance = inlier_distance;
         best_num_inliers = num_inliers;
         best_inliers = inliers;
         has_best = true;
