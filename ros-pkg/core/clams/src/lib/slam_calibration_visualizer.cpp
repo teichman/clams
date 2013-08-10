@@ -177,6 +177,7 @@ namespace clams
 
   void SlamCalibrationVisualizer::setSequenceIdx(size_t idx)
   {
+    cout << "Building map..." << endl;
     Cloud::Ptr map = calibrator_->buildMap(idx);
     cout << "Done building map." << endl;
     cout << map->size() << " points." << endl;

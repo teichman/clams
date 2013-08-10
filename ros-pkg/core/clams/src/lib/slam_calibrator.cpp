@@ -59,7 +59,9 @@ namespace clams
       if(!traj.exists(i))
         continue;
 
-      cout << "Using frame " << i << " / " << traj.size() << endl;
+      if(i % traj.size() / 10 == 0)
+        cout << "." << flush;
+      //cout << "Using frame " << i << " / " << traj.size() << endl;
       Frame frame;
 
       sseq->readFrame(i, &frame);
@@ -80,7 +82,7 @@ namespace clams
       // Added intermediate filtering to handle memory overload on huge maps
       if(num_used_frames % 50 == 0)
       {
-        cout << "Filtering..." << endl;
+        //cout << "Filtering..." << endl;
         HighResTimer hrt("filtering");
         hrt.start();
         pcl::VoxelGrid<Point> vg;
@@ -92,8 +94,9 @@ namespace clams
         hrt.stop();
       }
     }
-
-    cout << "Filtering..." << endl;
+    cout << endl;
+    
+    //cout << "Filtering..." << endl;
     HighResTimer hrt("filtering");
     hrt.start();
     pcl::VoxelGrid<Point> vg;
@@ -103,7 +106,7 @@ namespace clams
     vg.filter(*tmp);
     *map = *tmp;
     hrt.stop();
-    cout << hrt.reportMilliseconds() << endl;
+    //cout << hrt.reportMilliseconds() << endl;
     cout << "Filtered map has " << map->size() << " points." << endl;
 
     return map;
@@ -132,6 +135,7 @@ namespace clams
       // -- Construct the map from the data and the trajectory.
       StreamSequenceBase::ConstPtr sseq = sseqs_[i];
       const Trajectory& traj = trajectories_[i];
+      cout << "Building map " << i << endl;
       Cloud::Ptr map = buildMap(i);
       total_num_training += processMap(*sseq, traj, *map, &model);
     }

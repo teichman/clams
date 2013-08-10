@@ -54,3 +54,6 @@ target_link_libraries(convert_trajectory clams)
 
 rosbuild_add_executable(visualize_trajectory src/prog/visualize_trajectory.cpp)
 target_link_libraries(visualize_trajectory clams)
+
+rosbuild_add_executable(visualize_trajectories src/prog/visualize_trajectories.cpp)
+target_link_libraries(visualize_trajectories clams)
