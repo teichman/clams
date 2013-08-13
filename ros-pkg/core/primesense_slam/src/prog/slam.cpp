@@ -50,20 +50,25 @@ int main(int argc, char** argv)
       sseq_names.push_back(p.leaf().string());
   }
   sort(sseq_names.begin(), sseq_names.end());
-                                              
+
+  cout << endl;
+  cout << endl;
   for(size_t i = 0; i < sseq_names.size(); ++i) { 
     string sseq_path = sequences_path + "/" + sseq_names[i];
     string output_dir = results_path + "/" + sseq_names[i];
   
+    if(bfs::exists(output_dir + "/traj_0.traj")) {
+      cout << "Output trajectory " << output_dir << "/traj_0.traj already exists.  "
+           << "Skipping this sequence." << endl;
+      continue;
+    }
+
+    bfs::create_directory(output_dir);
     cout << endl;
     cout << "Running slam on sequence in " << sseq_path << endl;
     cout << "Saving output in " << output_dir << endl;
-    
-    if(!bfs::exists(output_dir))
-      boost::filesystem::create_directory(output_dir);
-    
+        
     StreamSequenceBase::Ptr sseq = StreamSequenceBase::initializeFromDirectory(sseq_path);
-    
     PrimeSenseSlam pss;
     if(opts.count("max-loopclosures")) {
       pss.max_loopclosures_ = opts["max-loopclosures"].as<int>();
