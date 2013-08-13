@@ -24,6 +24,10 @@ namespace clams
     vis_.registerPointPickingCallback(&TrajectoryVisualizer::pointPickingCallback, *this);
     vis_.setBackgroundColor(1, 1, 1);
     vis_.addText("", 10, 10, 16, 0, 0, 0, "title");
+
+    Cloud::Ptr pcd(new Cloud);
+    vis_.addPointCloud(pcd, "map");
+    vis_.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "map");
   }
 
   void TrajectoryVisualizer::run()
@@ -74,8 +78,7 @@ namespace clams
         vis_.removeShape("title");
         vis_.addText(title_, 10, 10, 16, 0, 0, 0, "title");
       
-        if(!vis_.updatePointCloud(pcd, "default"))
-          vis_.addPointCloud(pcd, "default");
+        vis_.updatePointCloud(pcd, "map");
         needs_update_ = false;
       }
 
