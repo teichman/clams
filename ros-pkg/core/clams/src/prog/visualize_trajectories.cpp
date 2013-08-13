@@ -71,7 +71,8 @@ int main(int argc, char** argv)
     cout << "== Displaying " << traj_path << endl;
     cout << "==========" << endl;
     cout << "Press ESC to advance to next map." << endl;
-    
+
+    tv.setTitle(sseq_names[i]);
     tv.run();
     usleep(1e5);
   }

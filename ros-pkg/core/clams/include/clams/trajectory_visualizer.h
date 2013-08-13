@@ -20,7 +20,7 @@ namespace clams
   
     TrajectoryVisualizer(StreamSequenceBase::ConstPtr sseq, Trajectory traj);
     ~TrajectoryVisualizer() { if(dddm_) delete dddm_; }
-      
+    void setTitle(std::string title) { title_ = title; }
     void run();
   
   protected:
@@ -34,6 +34,7 @@ namespace clams
     bool show_frame_;
     bool use_distortion_model_;
     bool color_frame_;
+    std::string title_;
 
     void keyboardCallback(const pcl::visualization::KeyboardEvent& event, void* cookie);
     void pointPickingCallback(const pcl::visualization::PointPickingEvent& event, void* cookie);

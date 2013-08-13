@@ -23,6 +23,7 @@ namespace clams
     vis_.registerKeyboardCallback(&TrajectoryVisualizer::keyboardCallback, *this);
     vis_.registerPointPickingCallback(&TrajectoryVisualizer::pointPickingCallback, *this);
     vis_.setBackgroundColor(1, 1, 1);
+    vis_.addText("", 10, 10, 16, 0, 0, 0, "title");
   }
 
   void TrajectoryVisualizer::run()
@@ -44,7 +45,7 @@ namespace clams
       if(needs_update_) {
         Cloud::Ptr pcd(new Cloud);
         *pcd = *map_;
-
+        
         // -- Add the raw sensor data from the current frame.
         if(show_frame_) { 
           if(traj_.exists(frame_idx_)) {
@@ -69,6 +70,9 @@ namespace clams
             *pcd += pose_pcd;
           }
         }
+
+        vis_.removeShape("title");
+        vis_.addText(title_, 10, 10, 16, 0, 0, 0, "title");
       
         if(!vis_.updatePointCloud(pcd, "default"))
           vis_.addPointCloud(pcd, "default");
