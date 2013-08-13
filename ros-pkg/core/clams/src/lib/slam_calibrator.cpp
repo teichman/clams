@@ -59,9 +59,8 @@ namespace clams
       if(!traj.exists(i))
         continue;
 
-      if(i % traj.size() / 10 == 0)
-        cout << "." << flush;
-      //cout << "Using frame " << i << " / " << traj.size() << endl;
+      // if(i % traj.size() / 10 == 0)
+      //   cout << "." << flush;
       Frame frame;
 
       sseq->readFrame(i, &frame);
@@ -94,7 +93,7 @@ namespace clams
         hrt.stop();
       }
     }
-    cout << endl;
+    //cout << endl;
     
     //cout << "Filtering..." << endl;
     HighResTimer hrt("filtering");
@@ -135,7 +134,7 @@ namespace clams
       // -- Construct the map from the data and the trajectory.
       StreamSequenceBase::ConstPtr sseq = sseqs_[i];
       const Trajectory& traj = trajectories_[i];
-      cout << "Building map " << i << endl;
+      cout << "Building map " << i << "..." << endl;
       Cloud::Ptr map = buildMap(i);
       total_num_training += processMap(*sseq, traj, *map, &model);
     }
@@ -165,6 +164,7 @@ namespace clams
 
     // -- For all selected frames, accumulate training examples
     //    in the distortion model.
+    cout << "Accumulating training data" << flush;
     VectorXi counts = VectorXi::Zero(indices.size());
 #pragma omp parallel for
     for(size_t i = 0; i < indices.size(); ++i) {
@@ -200,6 +200,8 @@ namespace clams
         }
       }
     }
+    cout << endl;
+    
 
     return counts.sum();
   }
