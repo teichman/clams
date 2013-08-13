@@ -26,6 +26,8 @@ namespace clams
     vis_.addText("", 10, 10, 16, 0, 0, 0, "title");
 
     Cloud::Ptr pcd(new Cloud);
+    Point tmp(0, 0, 0);
+    pcd->push_back(tmp);  // PCLVis / VTK can spit out horrible garbage if you give it an empty pcd.
     vis_.addPointCloud(pcd, "map");
     vis_.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "map");
   }
