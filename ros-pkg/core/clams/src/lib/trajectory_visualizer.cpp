@@ -90,6 +90,12 @@ namespace clams
       unlockWrite();
       vis_.spinOnce(3);
     }
+
+    // This PCL call doesn't appear to do anything.
+    // The result is that the visualizer persists when it shouldn't.
+    // This is a known bug. See
+    // https://github.com/PointCloudLibrary/pcl/pull/85
+    vis_.close();  
   }
 
   void TrajectoryVisualizer::pointPickingCallback(const pcl::visualization::PointPickingEvent& event, void* cookie)
