@@ -1,8 +1,0 @@
-Params (7)
-double edge_trans_threshold 0.02
-double edge_rot_threshold 0.035
-int keypoints_per_frame 300
-double min_dt 0.1
-int max_loopclosures 5
-int max_loopclosure_tests 500
-int min_subgraph_size 3
