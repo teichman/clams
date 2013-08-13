@@ -1,4 +1,4 @@
-#include <clams/slam_calibration_visualizer.h>
+#include <clams/trajectory_visualizer.h>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
@@ -59,21 +59,21 @@ int main(int argc, char** argv)
   for(size_t i = 0; i < sseq_names.size(); ++i) { 
     string sseq_path = sequences_path + "/" + sseq_names[i];
     string traj_path = results_path + "/" + sseq_names[i] + "/traj_0.traj";  // Just use the biggest subma
+    StreamSequenceBase::ConstPtr sseq = StreamSequenceBase::initializeFromDirectory(sseq_path);
     Trajectory traj;
     traj.load(traj_path);
 
-    StreamSequenceBase::ConstPtr sseq = StreamSequenceBase::initializeFromDirectory(sseq_path);
-  
-    SlamCalibrator::Ptr calibrator(new SlamCalibrator(sseq->proj_, max_range, resolution));
+    TrajectoryVisualizer tv(sseq, traj);
+    tv.max_range_ = max_range;
+    tv.vgsize_ = resolution;
+
     cout << "==========" << endl;
     cout << "== Displaying " << traj_path << endl;
     cout << "==========" << endl;
     cout << "Press ESC to advance to next map." << endl;
     
-    calibrator->trajectories_.push_back(traj);
-    calibrator->sseqs_.push_back(sseq);
-    SlamCalibrationVisualizer vis(calibrator);
-    vis.run();
+    tv.run();
+    usleep(1e5);
   }
 
   return 0;

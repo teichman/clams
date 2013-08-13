@@ -1,4 +1,4 @@
-#include <clams/slam_calibration_visualizer.h>
+#include <clams/trajectory_visualizer.h>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
@@ -44,17 +44,13 @@ int main(int argc, char** argv)
 
   Trajectory traj;
   traj.load(traj_path);
-
   StreamSequenceBase::ConstPtr sseq = StreamSequenceBase::initializeFromDirectory(sseq_path);
+  TrajectoryVisualizer tv(sseq, traj);
+  tv.max_range_ = max_range;
+  tv.vgsize_ = resolution;
+  cout << "Using " << tv.max_range_ << " for max range." << endl;
+  cout << "Using " << tv.vgsize_ << " for voxel grid size." << endl;
+  tv.run();
   
-  SlamCalibrator::Ptr calibrator(new SlamCalibrator(sseq->proj_, max_range, resolution));
-  cout << "Using " << calibrator->max_range_ << " for max range." << endl;
-  cout << "Using " << calibrator->vgsize_ << " for voxel grid size." << endl;
-
-  calibrator->trajectories_.push_back(traj);
-  calibrator->sseqs_.push_back(sseq);
-  SlamCalibrationVisualizer vis(calibrator);
-  vis.run();
-
   return 0;
 }
