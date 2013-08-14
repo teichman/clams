@@ -41,7 +41,7 @@ int main(int argc, char** argv)
   string results_path = workspace + "/slam_results";
   if(!bfs::exists(results_path)) {
     cout << "Expected results path \"" << results_path << "\" does not exist." << endl;
-    cout << "Are you running this program from within a CLAMS_WORKSPACE?" << endl;
+    cout << "Are you running this program from within a CLAMS workspace?" << endl;
     cout << "Have you run \"rosrun clams slam\" yet?" << endl;
     return 0;
   }
