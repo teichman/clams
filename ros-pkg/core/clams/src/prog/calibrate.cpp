@@ -16,7 +16,7 @@ int main(int argc, char** argv)
   string workspace;
   opts_desc.add_options()
     ("help,h", "produce help message")
-    ("workspace", bpo::value(&workspace)->required(), "CLAMS workspace.")
+    ("workspace", bpo::value(&workspace)->default_value("."), "CLAMS workspace.")
     ;
 
   p.add("workspace", 1);

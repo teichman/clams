@@ -24,6 +24,7 @@ protected:
   pcl::visualization::PCLVisualizer pcd_vis_;
   std::vector< boost::shared_ptr<openni_wrapper::Image> > image_buffer_;
   std::vector< boost::shared_ptr<openni_wrapper::DepthImage> > depth_buffer_;
+  bool quitting_;
 
   cv::Mat3b oniToCV(const openni_wrapper::Image& oni) const;
   void idiCallback(const boost::shared_ptr<openni_wrapper::Image>& img,
@@ -41,7 +42,8 @@ protected:
 Inspector::Inspector() :
   dddm_(NULL),
   use_intrinsics_(false),
-  pcd_vis_("Cloud")
+  pcd_vis_("Cloud"),
+  quitting_(false)
 {
   frame_.depth_ = DepthMatPtr(new DepthMat(480, 640));
   frame_.depth_->setZero();
@@ -103,6 +105,9 @@ void Inspector::keyboardCallback(const pcl::visualization::KeyboardEvent& event,
     else if(event.getKeyCode() == 'c') {
       pcd_vis_.removeAllShapes();
     }
+    else if(event.getKeyCode() == 27) {
+      quitting_ = true;
+    }
   }
 }
 
@@ -134,7 +139,7 @@ void Inspector::run()
   grabber.registerCallback(cb);
   grabber.start();
 
-  while(true) {
+  while(!quitting_) {
     lock();
     if(!image_buffer_.empty()) {
       updateDepth(*image_buffer_.back(), *depth_buffer_.back());
