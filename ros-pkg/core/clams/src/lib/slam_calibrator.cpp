@@ -139,7 +139,7 @@ namespace clams
       total_num_training += processMap(*sseq, traj, *map, &model);
     }
 
-    cout << "Training new DiscreteDepthDistortionModel using "
+    cout << "Trained new DiscreteDepthDistortionModel using "
          << total_num_training << " training examples." << endl;
   
     return model;
