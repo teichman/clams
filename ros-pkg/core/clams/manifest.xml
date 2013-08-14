@@ -11,6 +11,7 @@
 
   <depend package="stream_sequence"/>
   <depend package="bag_of_tricks"/>
+  <depend package="dvo_benchmark"/>
 
   <export>
     <cpp cflags="-I${prefix}/include -fopenmp"
