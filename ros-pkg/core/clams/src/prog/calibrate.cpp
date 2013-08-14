@@ -56,7 +56,7 @@ int main(int argc, char** argv)
   vector<Trajectory> trajs;
   for(size_t i = 0; i < sseq_names.size(); ++i) { 
     string sseq_path = sequences_path + "/" + sseq_names[i];
-    string traj_path = results_path + "/" + sseq_names[i] + "/traj_0.traj";  // Just use the biggest submap.
+    string traj_path = results_path + "/" + sseq_names[i] + "/trajectory";
 
     cout << "Log " << i << endl;
     cout << "  StreamSequence:" << sseq_path << endl;

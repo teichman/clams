@@ -49,8 +49,8 @@ int main(int argc, char** argv)
   vector<string> sseq_names;
   bfs::directory_iterator it(results_path), eod;
   BOOST_FOREACH(const bfs::path& p, make_pair(it, eod)) {
-    string path = results_path + "/" + p.leaf().string();
-    if(bfs::is_directory(path))
+    string path = results_path + "/" + p.leaf().string() + "/trajectory";
+    if(bfs::exists(path))
       sseq_names.push_back(p.leaf().string());
   }
   sort(sseq_names.begin(), sseq_names.end());
@@ -58,7 +58,7 @@ int main(int argc, char** argv)
   // -- Display each trajectory.
   for(size_t i = 0; i < sseq_names.size(); ++i) { 
     string sseq_path = sequences_path + "/" + sseq_names[i];
-    string traj_path = results_path + "/" + sseq_names[i] + "/traj_0.traj";  // Just use the biggest subma
+    string traj_path = results_path + "/" + sseq_names[i] + "/trajectory";
     StreamSequenceBase::ConstPtr sseq = StreamSequenceBase::initializeFromDirectory(sseq_path);
     Trajectory traj;
     traj.load(traj_path);

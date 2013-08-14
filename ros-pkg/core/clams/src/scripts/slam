@@ -31,7 +31,7 @@ do
     
     # -- Convert their trajectory to CLAMS trajectory.
     mkdir -p slam_results/$(basename $seq)
-    rosrun clams convert_trajectory $seq $fseq/assoc_opt_traj_final.txt slam_results/$(basename $seq)/clams.traj
+    rosrun clams convert_trajectory $seq $fseq/assoc_opt_traj_final.txt slam_results/$(basename $seq)/trajectory
 
     # -- Clean up Freiburg format sequence.
     rm -rf $fseq
