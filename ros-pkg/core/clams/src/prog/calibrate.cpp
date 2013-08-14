@@ -39,7 +39,12 @@ int main(int argc, char** argv)
   // -- Check for existence of CLAMS_WORKSPACE/slam_results.
   string sequences_path = workspace + "/sequences";
   string results_path = workspace + "/slam_results";
-  ROS_ASSERT(bfs::exists(results_path));
+  if(!bfs::exists(results_path)) {
+    cout << "Expected results path \"" << results_path << "\" does not exist." << endl;
+    cout << "Are you running this program from within a CLAMS_WORKSPACE?" << endl;
+    cout << "Have you run \"rosrun clams slam\" yet?" << endl;
+    return 0;
+  }
 
   // -- Get names of sequences that have corresponding results.
   vector<string> sseq_names;
