@@ -6,13 +6,15 @@ using namespace Eigen;
 namespace clams
 {
 
-  TrajectoryVisualizer::TrajectoryVisualizer(StreamSequenceBase::ConstPtr sseq, Trajectory traj) :
+  TrajectoryVisualizer::TrajectoryVisualizer(StreamSequenceBase::ConstPtr sseq,
+                                             Trajectory traj, Cloud::Ptr map) :
+                                             
     dddm_(NULL),
     max_range_(MAX_RANGE_MAP),
     vgsize_(DEFAULT_VGSIZE),
     sseq_(sseq),
     traj_(traj),
-    map_(new Cloud),
+    map_(map),
     quitting_(false),
     needs_update_(false),
     frame_idx_(0),
@@ -35,9 +37,11 @@ namespace clams
   void TrajectoryVisualizer::run()
   {
     // -- Build the map.
-    cout << "Building map..." << endl;
-    map_ = SlamCalibrator::buildMap(sseq_, traj_, max_range_, vgsize_);
-    cout << "Done building map." << endl;
+    if(!map_) {
+      cout << "Building map..." << endl;
+      map_ = SlamCalibrator::buildMap(sseq_, traj_, max_range_, vgsize_);
+      cout << "Done building map." << endl;
+    }
     cout << map_->size() << " points." << endl;
     needs_update_ = true;
 

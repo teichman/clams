@@ -18,7 +18,9 @@ namespace clams
     double max_range_;
     double vgsize_;
   
-    TrajectoryVisualizer(StreamSequenceBase::ConstPtr sseq, Trajectory traj);
+    TrajectoryVisualizer(StreamSequenceBase::ConstPtr sseq,
+                         Trajectory traj,
+                         Cloud::Ptr map = Cloud::Ptr());
     ~TrajectoryVisualizer() { if(dddm_) delete dddm_; }
     void setTitle(std::string title) { title_ = title; }
     void run();

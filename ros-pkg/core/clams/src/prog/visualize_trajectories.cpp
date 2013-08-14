@@ -59,6 +59,7 @@ int main(int argc, char** argv)
   for(size_t i = 0; i < sseq_names.size(); ++i) { 
     string sseq_path = sequences_path + "/" + sseq_names[i];
     string traj_path = results_path + "/" + sseq_names[i] + "/trajectory";
+    string map_path = results_path + "/" + sseq_names[i] + "/map.pcd";
     StreamSequenceBase::ConstPtr sseq = StreamSequenceBase::initializeFromDirectory(sseq_path);
     Trajectory traj;
     traj.load(traj_path);
