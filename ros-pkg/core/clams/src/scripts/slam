@@ -9,7 +9,7 @@ fi
 
 for seq in sequences/*
 do
-    if [ -e slam_results/$(basename $seq)/clams.traj ]
+    if [ -e slam_results/$(basename $seq)/trajectory ]
     then
         echo Trajectory for $(basename $seq) already exists.  Skipping.
         continue

@@ -18,7 +18,7 @@ int main(int argc, char** argv)
   double max_range;
   opts_desc.add_options()
     ("help,h", "produce help message")
-    ("workspace", bpo::value(&workspace)->required(), "CLAMS workspace.")
+    ("workspace", bpo::value(&workspace)->default_value("."), "CLAMS workspace.")
     ("resolution", bpo::value(&resolution)->default_value(0.02), "Resolution of the voxel grid used for display, in meters.")
     ("max-range", bpo::value(&max_range)->default_value(MAX_RANGE_MAP), "Maximum range to use when building the map from the given trajectory, in meters.")
     ;
