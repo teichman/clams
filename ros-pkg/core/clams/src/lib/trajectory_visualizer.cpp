@@ -7,28 +7,33 @@ namespace clams
 {
 
   TrajectoryVisualizer::TrajectoryVisualizer(StreamSequenceBase::ConstPtr sseq,
-                                             Trajectory traj, Cloud::Ptr map) :
+                                             Trajectory traj, std::string title) :
                                              
     dddm_(NULL),
     max_range_(MAX_RANGE_MAP),
     vgsize_(DEFAULT_VGSIZE),
     sseq_(sseq),
     traj_(traj),
-    map_(map),
+    map_(Cloud::Ptr(new Cloud)),
     quitting_(false),
     needs_update_(false),
     frame_idx_(0),
     show_frame_(false),
     use_distortion_model_(false),
-    color_frame_(false)
+    color_frame_(false),
+    title_(title)
   {
     vis_.registerKeyboardCallback(&TrajectoryVisualizer::keyboardCallback, *this);
     vis_.registerPointPickingCallback(&TrajectoryVisualizer::pointPickingCallback, *this);
     vis_.setBackgroundColor(1, 1, 1);
-    vis_.addText("", 10, 10, 16, 0, 0, 0, "title");
+    if(title != "")
+      vis_.addText(title_, 10, 10, 16, 0, 0, 0, "title");
 
     Cloud::Ptr pcd(new Cloud);
     Point tmp(0, 0, 0);
+    tmp.r = 0;
+    tmp.g = 0;
+    tmp.b = 0;
     pcd->push_back(tmp);  // PCLVis / VTK can spit out horrible garbage if you give it an empty pcd.
     vis_.addPointCloud(pcd, "map");
     vis_.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "map");
@@ -37,11 +42,9 @@ namespace clams
   void TrajectoryVisualizer::run()
   {
     // -- Build the map.
-    if(!map_) {
-      cout << "Building map..." << endl;
-      map_ = SlamCalibrator::buildMap(sseq_, traj_, max_range_, vgsize_);
-      cout << "Done building map." << endl;
-    }
+    cout << "Building map..." << endl;
+    map_ = SlamCalibrator::buildMap(sseq_, traj_, max_range_, vgsize_);
+    cout << "Done building map." << endl;
     cout << map_->size() << " points." << endl;
     needs_update_ = true;
 
@@ -115,6 +118,7 @@ namespace clams
     event.getPoint(pt.x, pt.y, pt.z);
     cout << "Selected point: " << pt.x << ", " << pt.y << ", " << pt.z << endl;
     vis_.removeAllShapes();
+    vis_.addText(title_, 10, 10, 16, 0, 0, 0, "title");
   
     Point origin;
     Affine3f transform = traj_.get(frame_idx_).cast<float>();
@@ -184,6 +188,7 @@ namespace clams
   
     scopeLockWrite;
     vis_.removeAllShapes();
+    vis_.addText(title_, 10, 10, 16, 0, 0, 0, "title");
     frame_idx_ = (size_t)idx;
     needs_update_ = true;
   }

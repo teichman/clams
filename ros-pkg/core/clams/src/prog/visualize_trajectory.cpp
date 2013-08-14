@@ -45,7 +45,7 @@ int main(int argc, char** argv)
   Trajectory traj;
   traj.load(traj_path);
   StreamSequenceBase::ConstPtr sseq = StreamSequenceBase::initializeFromDirectory(sseq_path);
-  TrajectoryVisualizer tv(sseq, traj);
+  TrajectoryVisualizer tv(sseq, traj, sseq_path);
   tv.max_range_ = max_range;
   tv.vgsize_ = resolution;
   cout << "Using " << tv.max_range_ << " for max range." << endl;

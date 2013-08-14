@@ -19,10 +19,8 @@ namespace clams
     double vgsize_;
   
     TrajectoryVisualizer(StreamSequenceBase::ConstPtr sseq,
-                         Trajectory traj,
-                         Cloud::Ptr map = Cloud::Ptr());
+                         Trajectory traj, std::string title = "");
     ~TrajectoryVisualizer() { if(dddm_) delete dddm_; }
-    void setTitle(std::string title) { title_ = title; }
     void run();
   
   protected:
