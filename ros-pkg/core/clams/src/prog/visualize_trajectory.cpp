@@ -15,18 +15,17 @@ int main(int argc, char** argv)
 
   string sseq_path;
   string traj_path;
-  double resolution;
-  double max_range;
+  string map_path;
   opts_desc.add_options()
     ("help,h", "produce help message")
     ("sseq", bpo::value(&sseq_path)->required(), "StreamSequence, i.e. asus data.")
     ("traj", bpo::value(&traj_path)->required(), "Trajectory from slam in CLAMS format.")
-    ("resolution", bpo::value(&resolution)->default_value(0.02), "Resolution of the voxel grid used for display, in meters.")
-    ("max-range", bpo::value(&max_range)->default_value(MAX_RANGE_MAP), "Maximum range to use when building the map from the given trajectory, in meters.")
+    ("map", bpo::value(&map_path), "Cached map.")
     ;
 
   p.add("sseq", 1);
   p.add("traj", 1);
+  p.add("map", 1);
   
   bpo::variables_map opts;
   bool badargs = false;
@@ -45,11 +44,10 @@ int main(int argc, char** argv)
   Trajectory traj;
   traj.load(traj_path);
   StreamSequenceBase::ConstPtr sseq = StreamSequenceBase::initializeFromDirectory(sseq_path);
-  TrajectoryVisualizer tv(sseq, traj, sseq_path);
-  tv.max_range_ = max_range;
-  tv.vgsize_ = resolution;
-  cout << "Using " << tv.max_range_ << " for max range." << endl;
-  cout << "Using " << tv.vgsize_ << " for voxel grid size." << endl;
+  Cloud::Ptr map(new Cloud);
+  pcl::io::loadPCDFile<pcl::PointXYZRGB>(map_path, *map);
+
+  TrajectoryVisualizer tv(sseq, traj, map, sseq_path);
   tv.run();
   
   return 0;

@@ -17,7 +17,7 @@ do
         echo ==========
         echo Press ESC to advance to next map.
 
-        rosrun clams visualize_trajectory $seq slam_results/$(basename $seq)/trajectory
+        rosrun clams visualize_trajectory $seq slam_results/$(basename $seq)/trajectory slam_results/$(basename $seq)/visualization_map.pcd
     fi
 done
 

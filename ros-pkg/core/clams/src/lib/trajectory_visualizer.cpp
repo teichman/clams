@@ -7,16 +7,16 @@ namespace clams
 {
 
   TrajectoryVisualizer::TrajectoryVisualizer(StreamSequenceBase::ConstPtr sseq,
-                                             Trajectory traj, std::string title) :
+                                             Trajectory traj,
+                                             Cloud::Ptr map,
+                                             std::string title) :
                                              
     dddm_(NULL),
-    max_range_(MAX_RANGE_MAP),
-    vgsize_(DEFAULT_VGSIZE),
     sseq_(sseq),
     traj_(traj),
-    map_(Cloud::Ptr(new Cloud)),
+    map_(map),
     quitting_(false),
-    needs_update_(false),
+    needs_update_(true),
     frame_idx_(0),
     show_frame_(false),
     use_distortion_model_(false),
@@ -41,13 +41,6 @@ namespace clams
 
   void TrajectoryVisualizer::run()
   {
-    // -- Build the map.
-    cout << "Building map..." << endl;
-    map_ = SlamCalibrator::buildMap(sseq_, traj_, max_range_, vgsize_);
-    cout << "Done building map." << endl;
-    cout << map_->size() << " points." << endl;
-    needs_update_ = true;
-
     // -- Run the main visualization loop.
     incrementFrameIdx(1);
     while(true) {

@@ -15,11 +15,11 @@ namespace clams
   {
   public:
     DiscreteDepthDistortionModel* dddm_;
-    double max_range_;
-    double vgsize_;
   
     TrajectoryVisualizer(StreamSequenceBase::ConstPtr sseq,
-                         Trajectory traj, std::string title = "");
+                         Trajectory traj,
+                         Cloud::Ptr map,
+                         std::string title = "");
     ~TrajectoryVisualizer() { if(dddm_) delete dddm_; }
     void run();
   
