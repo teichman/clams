@@ -45,8 +45,8 @@ int main(int argc, char** argv)
   vector<string> sseq_names;
   bfs::directory_iterator it(results_path), eod;
   BOOST_FOREACH(const bfs::path& p, make_pair(it, eod)) {
-    string path = results_path + "/" + p.leaf().string();
-    if(bfs::is_directory(path))
+    string path = results_path + "/" + p.leaf().string() + "/trajectory";
+    if(bfs::exists(path))
       sseq_names.push_back(p.leaf().string());
   }
   sort(sseq_names.begin(), sseq_names.end());
