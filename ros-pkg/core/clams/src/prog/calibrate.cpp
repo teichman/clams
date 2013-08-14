@@ -60,7 +60,7 @@ int main(int argc, char** argv)
     string traj_path = results_path + "/" + sseq_names[i] + "/trajectory";
     string map_path = results_path + "/" + sseq_names[i] + "/calibration_map.pcd";
 
-    cout << "Log " << i << endl;
+    cout << "Sequence " << i << endl;
     cout << "  StreamSequence:" << sseq_path << endl;
     cout << "  Trajectory: " << traj_path << endl;
     cout << "  Map: " << map_path << endl;

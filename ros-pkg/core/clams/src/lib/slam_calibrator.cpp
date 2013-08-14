@@ -121,8 +121,10 @@ namespace clams
     DiscreteDepthDistortionModel model(sseqs_[0]->proj_.width_, sseqs_[0]->proj_.height_);
 
     size_t total_num_training = 0;
-    for(size_t i = 0; i < size(); ++i)
+    for(size_t i = 0; i < size(); ++i) {
+      cout << "Accumulating training data for sequence " << i << flush;
       total_num_training += processMap(*sseqs_[i], trajectories_[i], *maps_[i], &model);
+    }
 
     cout << "Trained new DiscreteDepthDistortionModel using "
          << total_num_training << " training examples." << endl;
@@ -149,7 +151,6 @@ namespace clams
 
     // -- For all selected frames, accumulate training examples
     //    in the distortion model.
-    cout << "Accumulating training data" << flush;
     VectorXi counts = VectorXi::Zero(indices.size());
 #pragma omp parallel for
     for(size_t i = 0; i < indices.size(); ++i) {
