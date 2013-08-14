@@ -20,14 +20,10 @@ namespace clams
     FrameProjector proj_;
     std::vector<Trajectory> trajectories_;
     std::vector<StreamSequenceBase::ConstPtr> sseqs_;
-    double max_range_;
-    double vgsize_;
+    std::vector<Cloud::ConstPtr> maps_;
     int increment_;
 
-    SlamCalibrator(const FrameProjector& proj,
-                   double max_range = MAX_RANGE_MAP,
-                   double vgsize = DEFAULT_VGSIZE);
-    Cloud::Ptr buildMap(size_t idx) const;
+    SlamCalibrator(const FrameProjector& proj);
     static Cloud::Ptr buildMap(StreamSequenceBase::ConstPtr sseq,
                                const Trajectory& traj,
                                double max_range,
@@ -41,6 +37,9 @@ namespace clams
     size_t processMap(const StreamSequenceBase& sseq,
                       const Trajectory& traj, const Cloud& map,
                       DiscreteDepthDistortionModel* model) const;
+
+  protected:
+
 
   };
 

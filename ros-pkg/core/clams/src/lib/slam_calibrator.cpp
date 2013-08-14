@@ -6,10 +6,8 @@ using namespace Eigen;
 namespace clams
 {
 
-  SlamCalibrator::SlamCalibrator(const FrameProjector& proj, double max_range, double vgsize) :
+  SlamCalibrator::SlamCalibrator(const FrameProjector& proj) :
     proj_(proj),
-    max_range_(max_range),
-    vgsize_(vgsize),
     increment_(1)
   {
   }
@@ -111,13 +109,6 @@ namespace clams
     return map;
   }
 
-  Cloud::Ptr SlamCalibrator::buildMap(size_t idx) const
-  {
-    ROS_ASSERT(idx < trajectories_.size());
-    ROS_ASSERT(trajectories_.size() == sseqs_.size());
-    return buildMap(sseqs_[idx], trajectories_[idx], max_range_, vgsize_);
-  }
-
   size_t SlamCalibrator::size() const
   {
     ROS_ASSERT(trajectories_.size() == sseqs_.size());
@@ -130,14 +121,8 @@ namespace clams
     DiscreteDepthDistortionModel model(sseqs_[0]->proj_.width_, sseqs_[0]->proj_.height_);
 
     size_t total_num_training = 0;
-    for(size_t i = 0; i < size(); ++i) {
-      // -- Construct the map from the data and the trajectory.
-      StreamSequenceBase::ConstPtr sseq = sseqs_[i];
-      const Trajectory& traj = trajectories_[i];
-      cout << "Building map " << i << "..." << endl;
-      Cloud::Ptr map = buildMap(i);
-      total_num_training += processMap(*sseq, traj, *map, &model);
-    }
+    for(size_t i = 0; i < size(); ++i)
+      total_num_training += processMap(*sseqs_[i], trajectories_[i], *maps_[i], &model);
 
     cout << "Trained new DiscreteDepthDistortionModel using "
          << total_num_training << " training examples." << endl;

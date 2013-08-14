@@ -54,25 +54,33 @@ int main(int argc, char** argv)
   // -- Construct sseqs with corresponding trajectories.
   vector<StreamSequenceBase::ConstPtr> sseqs;
   vector<Trajectory> trajs;
+  vector<Cloud::ConstPtr> maps;
   for(size_t i = 0; i < sseq_names.size(); ++i) { 
     string sseq_path = sequences_path + "/" + sseq_names[i];
     string traj_path = results_path + "/" + sseq_names[i] + "/trajectory";
+    string map_path = results_path + "/" + sseq_names[i] + "/calibration_map.pcd";
 
     cout << "Log " << i << endl;
     cout << "  StreamSequence:" << sseq_path << endl;
     cout << "  Trajectory: " << traj_path << endl;
+    cout << "  Map: " << map_path << endl;
 
     sseqs.push_back(StreamSequenceBase::initializeFromDirectory(sseq_path));
+
     Trajectory traj;
     traj.load(traj_path);
     trajs.push_back(traj);
+
+    Cloud::Ptr map(new Cloud);
+    pcl::io::loadPCDFile<pcl::PointXYZRGB>(map_path, *map);
+    maps.push_back(map);
   }
 
   // -- Run the calibrator.
   SlamCalibrator::Ptr calibrator(new SlamCalibrator(sseqs[0]->proj_));
-  cout << "Using " << calibrator->max_range_ << " as max range." << endl;
   calibrator->trajectories_ = trajs;
   calibrator->sseqs_ = sseqs;
+  calibrator->maps_ = maps;
   
   DiscreteDepthDistortionModel model = calibrator->calibrate();
   string output_path = workspace + "/distortion_model";
