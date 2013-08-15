@@ -88,7 +88,7 @@ int main(int argc, char** argv)
   cout << endl;
   if(opts.count("increment")) {
     calibrator->increment_ = opts["increment"].as<int>();
-    cout << "Using increment of " << calibrator->increment_ << endl;
+    cout << "Using frame increment of " << calibrator->increment_ << endl;
   }
   cout << endl;
   
