@@ -143,9 +143,10 @@ namespace clams
     indices.reserve(traj.numValid());
     int num = 0;
     for(size_t i = 0; i < traj.size(); ++i) {
-      if(traj.exists(i) && num % increment_ == 0) {
-        indices.push_back(i);
+      if(traj.exists(i)) { 
         ++num;
+        if(num % increment_ == 0)
+          indices.push_back(i);
       }
     }
 

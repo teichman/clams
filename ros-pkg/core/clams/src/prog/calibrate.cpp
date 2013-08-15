@@ -17,6 +17,7 @@ int main(int argc, char** argv)
   opts_desc.add_options()
     ("help,h", "produce help message")
     ("workspace", bpo::value(&workspace)->default_value("."), "CLAMS workspace.")
+    ("increment", bpo::value<int>(), "Use every kth frame instead of every frame.")
     ;
 
   p.add("workspace", 1);
@@ -83,6 +84,14 @@ int main(int argc, char** argv)
 
   // -- Run the calibrator.
   SlamCalibrator::Ptr calibrator(new SlamCalibrator(sseqs[0]->proj_));
+
+  cout << endl;
+  if(opts.count("increment")) {
+    calibrator->increment_ = opts["increment"].as<int>();
+    cout << "Using increment of " << calibrator->increment_ << endl;
+  }
+  cout << endl;
+  
   calibrator->trajectories_ = trajs;
   calibrator->sseqs_ = sseqs;
   calibrator->maps_ = maps;
