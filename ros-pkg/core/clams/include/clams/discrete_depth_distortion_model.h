@@ -5,11 +5,10 @@
 #include <vector>
 #include <boost/thread/shared_mutex.hpp>
 #include <eigen_extensions/eigen_extensions.h>
+#include <stream_sequence/typedefs.h>
 
 namespace clams
 {
-
-  typedef Eigen::Matrix<unsigned short, Eigen::Dynamic, Eigen::Dynamic> DepthMat;
 
 /* SharedLockable is based on the uncopyable boost::shared_mutex.
    This presents a dilemma when assigning or copy constructing.

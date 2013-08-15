@@ -4,12 +4,6 @@ using namespace std;
 using namespace Eigen;
 namespace bfs = boost::filesystem;
 
-// These are needed in frame_projector.h, but we don't want to depend on that code
-// so that people can easily use the DiscreteDepthDistortionModel without
-// worrying about dependencies.
-#define MAX_MULT 1.2
-#define MIN_MULT 0.8
-
 namespace clams
 {
 

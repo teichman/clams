@@ -10,10 +10,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <serializable/serializable.h>
 #include <eigen_extensions/eigen_extensions.h>
+#include <stream_sequence/pcl_typedefs.h>
 #include <stream_sequence/typedefs.h>
-
-#define MAX_MULT 1.2
-#define MIN_MULT 0.8
 
 namespace clams
 {
