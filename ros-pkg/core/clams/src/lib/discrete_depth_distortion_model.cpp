@@ -28,6 +28,7 @@ namespace clams
   
     int idx = min(num_bins_ - 1, (int)floor(measurement / bin_depth_));
     assert(idx >= 0);
+
     total_numerators_(idx) += ground_truth * ground_truth;
     total_denominators_(idx) += ground_truth * measurement;
     ++counts_(idx);

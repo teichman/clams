@@ -153,7 +153,7 @@ namespace clams
     // -- For all selected frames, accumulate training examples
     //    in the distortion model.
     VectorXi counts = VectorXi::Zero(indices.size());
-#pragma omp parallel for
+    #pragma omp parallel for
     for(size_t i = 0; i < indices.size(); ++i) {
       size_t idx = indices[i];
       ROS_ASSERT(traj.exists(idx));
@@ -168,6 +168,10 @@ namespace clams
                                   measurement, mapframe.depth_.get());
       counts[i] = model->accumulate(*mapframe.depth_, *measurement.depth_);
 
+      // cv::imshow("map", mapframe.depthImage());
+      // cv::imshow("measurement", measurement.depthImage());
+      // cv::waitKey();
+      
       // -- Quick and dirty option for data inspection.
       if(getenv("U") && getenv("V")) {
         int u_center = atoi(getenv("U"));
