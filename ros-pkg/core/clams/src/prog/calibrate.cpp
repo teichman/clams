@@ -17,7 +17,7 @@ int main(int argc, char** argv)
   opts_desc.add_options()
     ("help,h", "produce help message")
     ("workspace", bpo::value(&workspace)->default_value("."), "CLAMS workspace.")
-    ("increment", bpo::value<int>(), "Use every kth frame instead of every frame.")
+    ("increment", bpo::value<int>()->default_value(10), "Use every kth frame for calibration.")
     ;
 
   p.add("workspace", 1);
