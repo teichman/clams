@@ -20,7 +20,7 @@ int main(int argc, char** argv)
     ("help,h", "produce help message")
     ("sseq", bpo::value(&sseq_path)->required(), "StreamSequence, i.e. asus data.")
     ("traj", bpo::value(&traj_path)->required(), "Trajectory from slam in CLAMS format.")
-    ("map", bpo::value(&map_path), "Cached map.")
+    ("map", bpo::value(&map_path)->required(), "Cached map.")
     ;
 
   p.add("sseq", 1);
@@ -35,7 +35,7 @@ int main(int argc, char** argv)
   }
   catch(...) { badargs = true; }
   if(opts.count("help") || badargs) {
-    cout << "Usage: " << bfs::basename(argv[0]) << " [OPTS] SSEQ TRAJ" << endl;
+    cout << "Usage: " << bfs::basename(argv[0]) << " [OPTS] SSEQ TRAJ MAP" << endl;
     cout << endl;
     cout << opts_desc << endl;
     return 1;
