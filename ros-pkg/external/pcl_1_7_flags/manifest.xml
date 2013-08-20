@@ -1,0 +1,20 @@
+<package>
+  <description brief="pcl_1_7_flags">
+
+     pcl_1_7_flags
+
+  </description>
+  <author>Alex Teichman</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/pcl_1_7_flags</url>
+
+  <export>
+    <cpp cflags="-isystem/usr/include/pcl-1.7/ -isystem/usr/include/ni -isystem/usr/include/openni"
+	 lflags="`ls /usr/lib/libpcl*.so | awk -F/ '{print $4}' | sed 's/lib/-l/' | sed 's/.so//'`" />
+  </export>
+
+  
+</package>
+
+

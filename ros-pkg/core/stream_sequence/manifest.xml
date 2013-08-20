@@ -9,8 +9,9 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/stream_sequence</url>
 
-  <depend package="pcl_1_7"/>
-  <depend package="opencv2"/>
+  <!-- depend package="pcl_1_7" /-->
+  <depend package="pcl_1_7_flags"/>
+  <depend package="opencv_flags"/>
   <depend package="serializable"/>
   <depend package="eigen_extensions"/>
   <depend package="rosconsole"/>
@@ -20,7 +21,6 @@
     <cpp cflags="-I${prefix}/include"
 	 lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lstream_sequence `rosboost-cfg --lflags filesystem`" />
   </export>
-  
 </package>
 
 

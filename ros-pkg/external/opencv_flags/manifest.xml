@@ -1,0 +1,19 @@
+<package>
+  <description brief="opencv_flags">
+
+     opencv_flags
+
+  </description>
+  <author>Alex Teichman</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/opencv_flags</url>
+
+  <export>
+    <cpp cflags="-I/usr/include/"
+	 lflags="`ls /usr/lib/libopencv*.so | awk -F/ '{print $4}' | sed 's/lib/-l/' | sed 's/\.so//'`" />
+  </export>
+  
+</package>
+
+
