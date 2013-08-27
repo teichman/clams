@@ -15,7 +15,7 @@ public:
   DiscreteDepthDistortionModel* dddm_;
   
   void run();
-  Inspector();
+  Inspector(pcl::OpenNIGrabber::Mode mode);
   
 protected:
   Frame frame_;
@@ -25,6 +25,8 @@ protected:
   std::vector< boost::shared_ptr<openni_wrapper::Image> > image_buffer_;
   std::vector< boost::shared_ptr<openni_wrapper::DepthImage> > depth_buffer_;
   bool quitting_;
+  pcl::OpenNIGrabber::Mode mode_;
+  FrameProjector proj_;
 
   cv::Mat3b oniToCV(const openni_wrapper::Image& oni) const;
   void idiCallback(const boost::shared_ptr<openni_wrapper::Image>& img,
@@ -39,15 +41,13 @@ protected:
   void disableModel();
 };
 
-Inspector::Inspector() :
+Inspector::Inspector(pcl::OpenNIGrabber::Mode mode) :
   dddm_(NULL),
   use_intrinsics_(false),
   pcd_vis_("Cloud"),
-  quitting_(false)
+  quitting_(false),
+  mode_(mode)
 {
-  frame_.depth_ = DepthMatPtr(new DepthMat(480, 640));
-  frame_.depth_->setZero();
-
   pcd_vis_.addCoordinateSystem(0.3);
   pcd_vis_.setBackgroundColor(0, 0, 0);
   Cloud::Ptr cloud(new Cloud);
@@ -127,11 +127,31 @@ void Inspector::pointPickingCallback(const pcl::visualization::PointPickingEvent
 
 void Inspector::run()
 {
-  pcl::OpenNIGrabber::Mode mode = pcl::OpenNIGrabber::OpenNI_VGA_30Hz;
-  cv::Size sz(640, 480);
+  cv::Size sz;
+  if(mode_ == pcl::OpenNIGrabber::OpenNI_VGA_30Hz) {
+    sz = cv::Size(640, 480);
+    frame_.depth_ = DepthMatPtr(new DepthMat(480, 640));
+    proj_.width_ = 640;
+    proj_.height_ = 480;
+    proj_.cx_ = proj_.width_ / 2;
+    proj_.cy_ = proj_.height_ / 2;
+    proj_.fx_ = 525;
+    proj_.fy_ = 525;
+  }
+  else if(mode_ == pcl::OpenNIGrabber::OpenNI_QVGA_30Hz) {
+    sz = cv::Size(320, 240);
+    frame_.depth_ = DepthMatPtr(new DepthMat(240, 320));
+    proj_.width_ = 320;
+    proj_.height_ = 240;
+    proj_.cx_ = proj_.width_ / 2;
+    proj_.cy_ = proj_.height_ / 2;
+    proj_.fx_ = 525.0 / 2;
+    proj_.fy_ = 525.0 / 2;
+  }
+  frame_.depth_->setZero();  
   img_vis_ = cv::Mat3b(sz, cv::Vec3b(0, 0, 0));
   
-  pcl::OpenNIGrabber grabber("", mode, mode);
+  pcl::OpenNIGrabber grabber("", mode_, mode_);
   boost::function<void (const boost::shared_ptr<openni_wrapper::Image>&,
                         const boost::shared_ptr<openni_wrapper::DepthImage>&,
                         float)> cb;
@@ -188,14 +208,7 @@ void Inspector::updateDepth(const openni_wrapper::Image& image,
   frame_.img_ = oniToCV(image);
     
   Cloud::Ptr cloud(new Cloud);
-  FrameProjector proj;
-  proj.width_ = 640;
-  proj.height_ = 480;
-  proj.cx_ = proj.width_ / 2;
-  proj.cy_ = proj.height_ / 2;
-  proj.fx_ = 525;
-  proj.fy_ = 525;
-  proj.frameToCloud(frame_, cloud.get());
+  proj_.frameToCloud(frame_, cloud.get());
   pcd_vis_.updatePointCloud(cloud, "cloud");
   pcd_vis_.spinOnce(5);
 }
@@ -217,9 +230,11 @@ int main(int argc, char** argv)
   bpo::options_description opts_desc("Allowed options");
   bpo::positional_options_description p;
 
+  string resolution;
   opts_desc.add_options()
     ("help,h", "produce help message")
     ("intrinsics", bpo::value<string>(), "Optional distortion model.")
+    ("resolution,r", bpo::value(&resolution), "")
     ;
 
   p.add("intrinsics", 1);
@@ -232,15 +247,19 @@ int main(int argc, char** argv)
   }
   catch(...) { badargs = true; }
   if(opts.count("help") || badargs) {
-    cout << "Usage: " << bfs::basename(argv[0]) << " [INTRINSICS]" << endl;
+    cout << "Usage: " << bfs::basename(argv[0]) << "[OPTS] [INTRINSICS]" << endl;
     cout << endl;
     cout << opts_desc << endl;
     return 1;
   }
 
   int retval = system("killall XnSensorServer 2> /dev/null"); --retval;
+
+  pcl::OpenNIGrabber::Mode mode = pcl::OpenNIGrabber::OpenNI_VGA_30Hz;
+  if(resolution == "qvga" || resolution == "QVGA")
+    mode = pcl::OpenNIGrabber::OpenNI_QVGA_30Hz;
   
-  Inspector inspector;
+  Inspector inspector(mode);
   if(opts.count("intrinsics")) {
     inspector.dddm_ = new DiscreteDepthDistortionModel;
     inspector.dddm_->load(opts["intrinsics"].as<string>());

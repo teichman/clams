@@ -151,18 +151,32 @@ namespace clams
 
   void DiscreteDepthDistortionModel::undistort(DepthMat* depth) const
   {
-    assert(width_ == depth->cols());
-    assert(height_ ==depth->rows());
-
-    #pragma omp parallel for
-    for(int v = 0; v < height_; ++v) {
-      for(int u = 0; u < width_; ++u) {
-        if(depth->coeffRef(v, u) == 0)
-          continue;
-
-        double z = depth->coeffRef(v, u) * 0.001;
-        frustum(v, u).interpolatedUndistort(&z);
-        depth->coeffRef(v, u) = z * 1000;
+    if(width_ == depth->cols()) {
+      #pragma omp parallel for
+      for(int v = 0; v < height_; ++v) {
+        for(int u = 0; u < width_; ++u) {
+          if(depth->coeffRef(v, u) == 0)
+            continue;
+          
+          double z = depth->coeffRef(v, u) * 0.001;
+          frustum(v, u).interpolatedUndistort(&z);
+          depth->coeffRef(v, u) = z * 1000;
+        }
+      }
+    }
+    // Special case for handling 320x240 depth images when the distortion model was
+    // trained at 640x480.
+    else if(depth->cols() == 320 && width_ == 640) {
+      #pragma omp parallel for
+      for(int v = 0; v < depth->rows(); ++v) {
+        for(int u = 0; u < depth->cols(); ++u) {
+          if(depth->coeffRef(v, u) == 0)
+            continue;
+          
+          double z = depth->coeffRef(v, u) * 0.001;
+          frustum(v*2, u*2).interpolatedUndistort(&z);
+          depth->coeffRef(v, u) = z * 1000;
+        }
       }
     }
   }
